@@ -1,0 +1,837 @@
+﻿/* =========================================================
+   AGENTCART
+   GLOBAL DESIGN SYSTEM + PAGE LAYOUT
+========================================================= */
+
+:root {
+  --bg: #f7f7f5;
+  --surface: #ffffff;
+  --surface-soft: #f1f1ed;
+
+  --text: #171717;
+  --text-secondary: #5f5f5f;
+  --text-muted: #858585;
+
+  --border: #deded8;
+  --border-light: #e9e9e4;
+
+  --success-bg: #eef8f2;
+  --success-border: #cce8d7;
+  --success-text: #176b3a;
+
+  --warning-bg: #fff6dc;
+  --warning-border: #ead99b;
+  --warning-text: #765900;
+
+  --danger-bg: #fff1f1;
+  --danger-border: #efcaca;
+  --danger-text: #a52c2c;
+
+  --black: #171717;
+
+  /*
+    Page gutters:
+    large enough to breathe,
+    small enough to actually use the viewport.
+  */
+  --page-gutter: clamp(24px, 3vw, 56px);
+
+  /*
+    Hero is deliberately focused.
+  */
+  --hero-width: 880px;
+
+  /*
+    Transaction workspace intentionally has
+    no artificial max-width.
+  */
+  --workspace-width: 100%;
+
+  --audit-width: 400px;
+  --workspace-gap: 24px;
+
+  --radius: 16px;
+
+  --shadow:
+    0 12px 35px rgba(0, 0, 0, 0.055);
+
+  font-family:
+    Inter,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    Arial,
+    sans-serif;
+
+  color: var(--text);
+  background: var(--bg);
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+
+/* =========================================================
+   RESET
+========================================================= */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  width: 100%;
+  min-width: 320px;
+  min-height: 100%;
+
+  margin: 0;
+  padding: 0;
+
+  background: var(--bg);
+
+  scroll-behavior: smooth;
+}
+
+body {
+  width: 100%;
+  min-width: 320px;
+  min-height: 100vh;
+
+  margin: 0;
+  padding: 0;
+
+  background: var(--bg);
+  color: var(--text);
+}
+
+button,
+textarea,
+input {
+  font: inherit;
+}
+
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+textarea {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+img,
+svg {
+  max-width: 100%;
+}
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+}
+
+
+/* =========================================================
+   PAGE SHELL
+========================================================= */
+
+.commerce-page {
+  width: 100%;
+  min-height: 100vh;
+
+  overflow-x: hidden;
+
+  background: var(--bg);
+  color: var(--text);
+}
+
+
+/* =========================================================
+   NAVBAR
+========================================================= */
+
+.navbar {
+  width: 100%;
+  height: 72px;
+
+  padding: 0 var(--page-gutter);
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  border-bottom: 1px solid var(--border);
+
+  background: rgba(247, 247, 245, 0.96);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  color: var(--text);
+
+  font-size: 20px;
+  font-weight: 750;
+
+  letter-spacing: -0.03em;
+}
+
+.brand-mark {
+  width: 34px;
+  height: 34px;
+
+  display: grid;
+  place-items: center;
+
+  flex-shrink: 0;
+
+  border-radius: 9px;
+
+  background: var(--black);
+  color: #ffffff;
+
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.nav-status {
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+
+  color: var(--text-secondary);
+
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.status-dot {
+  width: 7px;
+  height: 7px;
+
+  flex-shrink: 0;
+
+  border-radius: 50%;
+
+  background: #35a66f;
+}
+
+
+/* =========================================================
+   HERO
+========================================================= */
+
+.hero {
+  width: min(
+    var(--hero-width),
+    calc(100% - 48px)
+  );
+
+  margin: 0 auto;
+
+  padding:
+    clamp(64px, 7vw, 92px)
+    0
+    clamp(56px, 6vw, 72px);
+
+  /*
+    Important:
+    The entire customer-entry experience is centered.
+  */
+  text-align: center;
+}
+
+.hero-badge {
+  width: fit-content;
+
+  margin: 0 auto;
+
+  padding: 7px 12px;
+
+  border: 1px solid var(--border);
+  border-radius: 999px;
+
+  background: var(--surface);
+  color: var(--text-secondary);
+
+  font-size: 11px;
+  font-weight: 700;
+
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.hero h1 {
+  max-width: 900px;
+
+  margin:
+    22px auto
+    20px;
+
+  color: var(--text);
+
+  font-size: clamp(
+    48px,
+    6vw,
+    80px
+  );
+
+  line-height: 0.98;
+
+  letter-spacing: -0.065em;
+
+  font-weight: 780;
+}
+
+.hero h1 span {
+  color: #777777;
+}
+
+.hero-description {
+  max-width: 700px;
+
+  margin:
+    0 auto
+    36px;
+
+  color: var(--text-secondary);
+
+  font-size: 17px;
+  line-height: 1.6;
+}
+
+
+/* =========================================================
+   CUSTOMER REQUEST
+========================================================= */
+
+.request-card {
+  width: 100%;
+
+  margin: 0 auto;
+
+  padding: 22px;
+
+  border: 1px solid var(--border);
+  border-radius: 17px;
+
+  background: var(--surface);
+
+  box-shadow: var(--shadow);
+
+  text-align: left;
+}
+
+.request-card label {
+  display: block;
+
+  margin-bottom: 11px;
+
+  color: var(--text);
+
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.request-card textarea {
+  display: block;
+
+  width: 100%;
+  min-height: 104px;
+
+  resize: vertical;
+
+  padding: 15px;
+
+  border: 0;
+  outline: 0;
+
+  border-radius: 11px;
+
+  background: var(--surface-soft);
+  color: var(--text);
+
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.request-card textarea::placeholder {
+  color: #999999;
+}
+
+.request-card textarea:focus {
+  box-shadow:
+    inset 0 0 0 1px #b5b5b0;
+}
+
+.request-footer {
+  margin-top: 15px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 18px;
+}
+
+.hint {
+  color: var(--text-muted);
+
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.request-footer button {
+  min-height: 42px;
+
+  flex-shrink: 0;
+
+  padding: 11px 17px;
+
+  border: 0;
+  border-radius: 9px;
+
+  background: var(--black);
+  color: #ffffff;
+
+  font-size: 13px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition:
+    background 150ms ease,
+    transform 150ms ease;
+}
+
+.request-footer button:hover:not(:disabled) {
+  background: #303030;
+}
+
+.request-footer button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.request-footer button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+
+/* =========================================================
+   ERROR
+========================================================= */
+
+.error-message {
+  width: 100%;
+
+  margin-top: 16px;
+
+  padding: 14px 16px;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 4px;
+
+  border: 1px solid var(--danger-border);
+  border-radius: 11px;
+
+  background: var(--danger-bg);
+  color: var(--danger-text);
+
+  font-size: 13px;
+
+  text-align: left;
+}
+
+
+/* =========================================================
+   TRANSACTION WORKSPACE
+========================================================= */
+
+/*
+   This section intentionally breaks away from the
+   hero's focused width.
+
+   Hero:
+     focused + centered
+
+   Workspace:
+     wide + application-like
+*/
+
+.commerce-content {
+  width: var(--workspace-width);
+
+  margin: 0;
+
+  padding:
+    0
+    var(--page-gutter)
+    64px;
+
+  text-align: left;
+}
+
+
+/* =========================================================
+   TRANSACTION GRID
+========================================================= */
+
+.purchase-layout {
+  width: 100%;
+
+  display: grid;
+
+  /*
+    Primary workflow gets all remaining space.
+    Audit trail remains comfortably readable.
+  */
+  grid-template-columns:
+    minmax(0, 1fr)
+    minmax(360px, var(--audit-width));
+
+  gap: var(--workspace-gap);
+
+  align-items: start;
+}
+
+
+/* =========================================================
+   PRIMARY WORKFLOW
+========================================================= */
+
+.purchase-primary {
+  width: 100%;
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 18px;
+}
+
+.purchase-primary > * {
+  width: 100%;
+  min-width: 0;
+}
+
+
+/* =========================================================
+   AUDIT WORKSPACE
+========================================================= */
+
+.purchase-audit {
+  width: 100%;
+  min-width: 0;
+
+  position: sticky;
+  top: 20px;
+}
+
+.purchase-audit .audit-timeline {
+  width: 100%;
+  margin: 0;
+}
+
+
+/* =========================================================
+   TRUST SECTION
+========================================================= */
+
+.trust-section {
+  width: 100%;
+
+  padding:
+    0
+    var(--page-gutter)
+    56px;
+
+  text-align: left;
+}
+
+.trust-grid {
+  width: 100%;
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+
+  gap: 22px;
+
+  margin: 0;
+}
+
+.trust-item {
+  min-width: 0;
+
+  padding-top: 16px;
+
+  display: flex;
+
+  gap: 11px;
+
+  border-top: 1px solid var(--border);
+}
+
+.trust-item > span {
+  flex-shrink: 0;
+
+  color: #999999;
+
+  font-size: 10px;
+  font-weight: 750;
+}
+
+.trust-item strong {
+  display: block;
+
+  color: var(--text);
+
+  font-size: 13px;
+}
+
+.trust-item p {
+  margin: 5px 0 0;
+
+  color: var(--text-muted);
+
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+
+/* =========================================================
+   LARGE DESKTOP
+========================================================= */
+
+@media (min-width: 1500px) {
+  :root {
+    --page-gutter: clamp(
+      40px,
+      3.2vw,
+      64px
+    );
+
+    --audit-width: 410px;
+    --workspace-gap: 28px;
+  }
+
+  .hero {
+    padding-top: 82px;
+    padding-bottom: 72px;
+  }
+}
+
+
+/* =========================================================
+   MEDIUM DESKTOP
+========================================================= */
+
+@media (max-width: 1200px) {
+  :root {
+    --page-gutter: 32px;
+    --audit-width: 380px;
+    --workspace-gap: 22px;
+  }
+
+  .hero {
+    width: min(
+      var(--hero-width),
+      calc(100% - 48px)
+    );
+  }
+
+  .purchase-layout {
+    grid-template-columns:
+      minmax(0, 1fr)
+      minmax(340px, var(--audit-width));
+  }
+}
+
+
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media (max-width: 900px) {
+  :root {
+    --page-gutter: 24px;
+  }
+
+  .hero {
+    padding-top: 58px;
+    padding-bottom: 48px;
+  }
+
+  .hero h1 {
+    font-size: clamp(
+      46px,
+      8vw,
+      68px
+    );
+  }
+
+  .purchase-layout {
+    grid-template-columns: 1fr;
+
+    gap: 18px;
+  }
+
+  .purchase-audit {
+    position: static;
+  }
+
+  .trust-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+
+    gap: 18px;
+  }
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 600px) {
+  :root {
+    --page-gutter: 14px;
+  }
+
+  .navbar {
+    height: 62px;
+  }
+
+  .brand {
+    font-size: 18px;
+  }
+
+  .brand-mark {
+    width: 31px;
+    height: 31px;
+  }
+
+  .nav-status {
+    font-size: 11px;
+  }
+
+  .hero {
+    width: calc(100% - 28px);
+
+    padding-top: 44px;
+    padding-bottom: 38px;
+  }
+
+  .hero-badge {
+    font-size: 9px;
+  }
+
+  .hero h1 {
+    margin-top: 18px;
+    margin-bottom: 18px;
+
+    font-size: clamp(
+      40px,
+      12vw,
+      52px
+    );
+
+    line-height: 1;
+
+    letter-spacing: -0.055em;
+  }
+
+  .hero-description {
+    margin-bottom: 28px;
+
+    font-size: 15px;
+    line-height: 1.55;
+  }
+
+  .request-card {
+    padding: 17px;
+  }
+
+  .request-card textarea {
+    min-height: 96px;
+  }
+
+  .request-footer {
+    align-items: stretch;
+    flex-direction: column;
+
+    gap: 12px;
+  }
+
+  .request-footer button {
+    width: 100%;
+  }
+
+  .commerce-content {
+    padding:
+      0
+      var(--page-gutter)
+      42px;
+  }
+
+  .purchase-layout {
+    display: flex;
+    flex-direction: column;
+
+    gap: 16px;
+  }
+
+  .purchase-primary,
+  .purchase-audit {
+    width: 100%;
+  }
+
+  .trust-section {
+    padding:
+      0
+      var(--page-gutter)
+      38px;
+  }
+
+  .trust-grid {
+    grid-template-columns: 1fr;
+
+    gap: 16px;
+  }
+}
+
+
+/* =========================================================
+   SMALL MOBILE
+========================================================= */
+
+@media (max-width: 400px) {
+  .nav-status {
+    display: none;
+  }
+
+  .hero {
+    padding-top: 38px;
+  }
+
+  .hero h1 {
+    font-size: 38px;
+  }
+
+  .request-card {
+    padding: 15px;
+  }
+}

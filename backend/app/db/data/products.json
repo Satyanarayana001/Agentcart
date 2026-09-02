@@ -1,0 +1,91 @@
+[
+  {
+    "id": "hp_001",
+    "name": "SoundMax Pro ANC",
+    "category": "headphones",
+    "price": 4499,
+    "currency": "INR",
+    "features": {
+      "anc": true,
+      "battery_hours": 35,
+      "wireless": true
+    },
+    "stock": 17,
+    "description": "Wireless over-ear headphones with active noise cancellation and long battery life.",
+    "compatible_products": ["acc_001"]
+  },
+  {
+    "id": "hp_002",
+    "name": "BassBeat Air",
+    "category": "headphones",
+    "price": 3499,
+    "currency": "INR",
+    "features": {
+      "anc": false,
+      "battery_hours": 40,
+      "wireless": true
+    },
+    "stock": 25,
+    "description": "Affordable wireless headphones with powerful bass and long battery life.",
+    "compatible_products": ["acc_001"]
+  },
+  {
+    "id": "hp_003",
+    "name": "QuietPro Elite",
+    "category": "headphones",
+    "price": 4999,
+    "currency": "INR",
+    "features": {
+      "anc": true,
+      "battery_hours": 28,
+      "wireless": true
+    },
+    "stock": 0,
+    "description": "Premium noise-cancelling headphones designed for travel and focused work.",
+    "compatible_products": ["acc_002"]
+  },
+  {
+    "id": "hp_004",
+    "name": "StudioWave X",
+    "category": "headphones",
+    "price": 5799,
+    "currency": "INR",
+    "features": {
+      "anc": true,
+      "battery_hours": 45,
+      "wireless": true
+    },
+    "stock": 12,
+    "description": "Premium wireless headphones with advanced ANC and extended battery life.",
+    "compatible_products": ["acc_002"]
+  },
+  {
+    "id": "acc_001",
+    "name": "Protective Carrying Case",
+    "category": "accessory",
+    "price": 399,
+    "currency": "INR",
+    "features": {
+      "water_resistant": true,
+      "shock_protection": true
+    },
+    "stock": 50,
+    "description": "Protective carrying case compatible with selected headphones.",
+    "compatible_products": []
+  },
+  {
+    "id": "acc_002",
+    "name": "Premium Travel Case",
+    "category": "accessory",
+    "price": 699,
+    "currency": "INR",
+    "features": {
+      "water_resistant": true,
+      "shock_protection": true,
+      "extra_storage": true
+    },
+    "stock": 30,
+    "description": "Premium travel case with extra storage and enhanced protection.",
+    "compatible_products": []
+  }
+]
