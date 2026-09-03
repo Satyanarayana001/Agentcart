@@ -25,6 +25,9 @@ function CommercePage({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  const [agentMessage, setAgentMessage] =
+    useState("");
+
   const [notificationsOpen, setNotificationsOpen] =
     useState(false);
 
@@ -93,7 +96,11 @@ function CommercePage({
     }
 
     setLoading(true);
+
+    // Always clear the previous transaction workspace
+    // before processing a new request.
     setError("");
+    setAgentMessage("");
     setPlan(null);
     setAlternatives([]);
     setSelectedUnavailableProduct(null);
@@ -106,13 +113,55 @@ function CommercePage({
 
 
       // -------------------------------------------------------
+      // CATALOG INQUIRY
+      // -------------------------------------------------------
+      //
+      // IMPORTANT:
+      // This is NOT a purchase request.
+      //
+      // Therefore:
+      // - no plan
+      // - no approval
+      // - no payment
+      // - no audit transaction workspace
+      //
+      // The user is simply informed and can choose
+      // something from the catalog.
+      // -------------------------------------------------------
+
+      if (
+        agentResult?.status ===
+        "CATALOG_INQUIRY"
+      ) {
+        setPlan(null);
+        setAlternatives([]);
+        setSelectedUnavailableProduct(null);
+
+        setAgentMessage(
+          agentResult.explanation ||
+            "That product is not currently available "
+            + "in the AgentCart catalog. "
+            + "If you'd like anything else, you can choose "
+            + "from the products available below."
+        );
+
+        return;
+      }
+
+
+      // -------------------------------------------------------
       // PRODUCT UNAVAILABLE
       // -------------------------------------------------------
 
       if (
-        agentResult.status ===
+        agentResult?.status ===
         "ALTERNATIVES_REQUIRED"
       ) {
+        // There must never be a purchase plan displayed
+        // while the user is choosing an alternative.
+        setPlan(null);
+        setAgentMessage("");
+
         setAlternatives(
           agentResult.alternatives || []
         );
@@ -129,7 +178,7 @@ function CommercePage({
       // NORMAL PURCHASE PLAN
       // -------------------------------------------------------
 
-      if (!agentResult.plan_id) {
+      if (!agentResult?.plan_id) {
         throw new Error(
           "Agent did not return a purchase plan."
         );
@@ -140,9 +189,19 @@ function CommercePage({
           agentResult.plan_id
         );
 
+      setAgentMessage("");
+      setAlternatives([]);
+      setSelectedUnavailableProduct(null);
+
       setPlan(fullPlan);
 
     } catch (err) {
+      // A failed request must never leave an old
+      // purchase plan visible.
+      setPlan(null);
+      setAlternatives([]);
+      setSelectedUnavailableProduct(null);
+
       setError(
         err.message ||
           "Unable to process your request."
@@ -177,6 +236,7 @@ function CommercePage({
 
     setLoading(true);
     setError("");
+    setAgentMessage("");
 
     try {
       const quantity =
@@ -199,7 +259,7 @@ function CommercePage({
           maxBudget
         );
 
-      if (!result.plan_id) {
+      if (!result?.plan_id) {
         throw new Error(
           "Unable to create a purchase plan."
         );
@@ -217,6 +277,8 @@ function CommercePage({
       setSelectedUnavailableProduct(null);
 
     } catch (err) {
+      setPlan(null);
+
       setError(
         err.message ||
           "Unable to select this product."
@@ -234,6 +296,13 @@ function CommercePage({
   function handleCatalogProductSelected(
     product
   ) {
+    setAgentMessage("");
+    setError("");
+
+    setPlan(null);
+    setAlternatives([]);
+    setSelectedUnavailableProduct(null);
+
     setRequest(
       `Buy ${product.name}`
     );
@@ -312,9 +381,11 @@ function CommercePage({
 
           <div className="brand">
 
-            <span className="brand-mark">
-              A
-            </span>
+            <img
+              src="/agentcart-logo.svg"
+              alt="AgentCart"
+              className="brand-logo"
+            />
 
             <div className="brand-copy">
 
@@ -421,33 +492,23 @@ function CommercePage({
 
 
             {/* ===============================================
-                DIVIDER
+                SHOP
             =============================================== */}
 
-            <span className="nav-divider" />
-
-
-            {/* ===============================================
-                AI AGENT STATUS
-            =============================================== */}
-
-            <div className="nav-status">
-
-              <span className="status-dot" />
-
-              <div className="nav-status-copy">
-
-                <span className="nav-status-label">
-                  Agent active
-                </span>
-
-                <span className="nav-status-detail">
-                  Ready to purchase
-                </span>
-
-              </div>
-
-            </div>
+            <button
+              type="button"
+              className="nav-shop-button"
+              onClick={() => {
+                document
+                  .querySelector(".hero")
+                  ?.scrollIntoView({
+                    behavior: "smooth",
+                    block: "start",
+                  });
+              }}
+            >
+              Shop
+            </button>
 
 
             {/* ===============================================
@@ -507,10 +568,6 @@ function CommercePage({
               {accountOpen && (
                 <div className="account-menu">
 
-                  {/* -----------------------------------------
-                      PROFILE
-                  ----------------------------------------- */}
-
                   <div className="account-menu-profile">
 
                     <div className="account-menu-avatar">
@@ -533,10 +590,6 @@ function CommercePage({
 
                   </div>
 
-
-                  {/* -----------------------------------------
-                      DETAILS
-                  ----------------------------------------- */}
 
                   <div className="account-menu-details">
 
@@ -625,18 +678,10 @@ function CommercePage({
                   </div>
 
 
-                  {/* -----------------------------------------
-                      DEMO ACCOUNT
-                  ----------------------------------------- */}
-
                   <div className="account-demo-label">
                     Hackathon Demo Account
                   </div>
 
-
-                  {/* -----------------------------------------
-                      LOGOUT
-                  ----------------------------------------- */}
 
                   <button
                     type="button"
@@ -748,6 +793,25 @@ function CommercePage({
 
 
         {/* =================================================
+            AGENT CATALOG MESSAGE
+        ================================================= */}
+
+        {agentMessage && (
+          <div className="agent-message">
+
+            <strong>
+              AgentCart
+            </strong>
+
+            <span>
+              {agentMessage}
+            </span>
+
+          </div>
+        )}
+
+
+        {/* =================================================
             ERROR
         ================================================= */}
 
@@ -783,15 +847,17 @@ function CommercePage({
           ALTERNATIVES
       ===================================================== */}
 
-      <AlternativeProducts
-        unavailableProduct={
-          selectedUnavailableProduct
-        }
-        alternatives={alternatives}
-        onSelect={
-          handleAlternativeSelected
-        }
-      />
+      {alternatives.length > 0 && (
+        <AlternativeProducts
+          unavailableProduct={
+            selectedUnavailableProduct
+          }
+          alternatives={alternatives}
+          onSelect={
+            handleAlternativeSelected
+          }
+        />
+      )}
 
 
       {/* =====================================================

@@ -12,7 +12,8 @@
     },
     "stock": 17,
     "description": "Wireless over-ear headphones with active noise cancellation and long battery life.",
-    "compatible_products": ["acc_001"]
+    "compatible_products": ["acc_001"],
+    "image_url": "/static/images/hp_001.jpg"
   },
   {
     "id": "hp_002",
@@ -27,7 +28,8 @@
     },
     "stock": 25,
     "description": "Affordable wireless headphones with powerful bass and long battery life.",
-    "compatible_products": ["acc_001"]
+    "compatible_products": ["acc_001"],
+    "image_url": "/static/images/hp_002.jpg"
   },
   {
     "id": "hp_003",
@@ -42,7 +44,8 @@
     },
     "stock": 0,
     "description": "Premium noise-cancelling headphones designed for travel and focused work.",
-    "compatible_products": ["acc_002"]
+    "compatible_products": ["acc_002"],
+    "image_url": "/static/images/hp_003.jpg"
   },
   {
     "id": "hp_004",
@@ -57,7 +60,8 @@
     },
     "stock": 12,
     "description": "Premium wireless headphones with advanced ANC and extended battery life.",
-    "compatible_products": ["acc_002"]
+    "compatible_products": ["acc_002"],
+    "image_url": "/static/images/hp_004.jpg"
   },
   {
     "id": "acc_001",
@@ -71,7 +75,8 @@
     },
     "stock": 50,
     "description": "Protective carrying case compatible with selected headphones.",
-    "compatible_products": []
+    "compatible_products": [],
+    "image_url": "/static/images/acc_001.png"
   },
   {
     "id": "acc_002",
@@ -86,6 +91,7 @@
     },
     "stock": 30,
     "description": "Premium travel case with extra storage and enhanced protection.",
-    "compatible_products": []
+    "compatible_products": [],
+    "image_url": "/static/images/acc_002.png"
   }
 ]

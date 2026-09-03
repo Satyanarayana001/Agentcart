@@ -2,424 +2,362 @@
 
 ## Explainable AI-Powered Agentic Commerce
 
-> **AgentCart turns a natural-language shopping request into a policy-checked, human-approved, auditable transaction.**
+> **AgentCart turns a natural-language shopping request into a
+> policy-checked, human-approved, auditable transaction.**
 
-AgentCart is an **AI-powered agentic commerce platform** built for the Razorpay AI Buildathon — **Track 01: AI Growth & Agentic Commerce**.
+AgentCart is an **AI-powered agentic commerce platform** built for the
+Razorpay AI Buildathon --- **Track 01: AI Growth & Agentic Commerce**.
 
-The idea is simple:
+The project explores a simple question:
 
-A customer should not need to navigate a traditional e-commerce workflow just to explain what they want.
+> **How can AI make commerce easier without giving an AI unrestricted
+> authority over a customer's money?**
 
-Instead, they can tell an AI agent:
+A customer can express a shopping goal conversationally:
 
-```text
+``` text
 Buy wireless ANC headphones under ₹5000
 ```
 
-AgentCart understands the request, identifies a suitable product from its catalog, checks availability and purchasing constraints, explains the recommendation, creates a purchase plan, and waits for the customer to explicitly approve it.
+AgentCart interprets the request, works against a controlled product
+catalog, validates the resulting purchase against deterministic
+policies, explains the recommendation, creates a purchase plan, and
+waits for explicit customer approval.
 
-Only after approval can the payment flow begin.
+Only after approval can the payment stage begin.
 
-The central design principle is:
+------------------------------------------------------------------------
 
-```text
-┌──────────────────┐
-│   Customer Need  │
-└────────┬─────────┘
-         ↓
-┌──────────────────┐
-│    AI Agent      │
-│ Understand +     │
-│ Recommend        │
-└────────┬─────────┘
-         ↓
-┌──────────────────┐
-│  Policy Engine   │
-│ Budget + Stock + │
-│ Quantity + State │
-└────────┬─────────┘
-         ↓
-┌──────────────────┐
-│ Human Approval   │
-│ Explicit consent │
-└────────┬─────────┘
-         ↓
-┌──────────────────┐
-│ Razorpay Payment │
-└────────┬─────────┘
-         ↓
-┌──────────────────┐
-│ Payment Verify   │
-└────────┬─────────┘
-         ↓
-┌──────────────────┐
-│ Order + Audit    │
-└────────┬─────────┘
-         ↓
-┌──────────────────┐
-│ Tracking +       │
-│ Notifications    │
-└──────────────────┘
-```
-
-The important distinction is:
-
-> **The AI can recommend and prepare. It does not get unrestricted authority to move money.**
-
----
-
-# 🎯 The Problem
-
-Traditional e-commerce is optimized around screens, filters, search boxes, and checkout forms.
-
-That works well for deterministic shopping, but it creates friction when the customer has a goal rather than a specific SKU.
-
-For example:
-
-```text
-"I need wireless ANC headphones,
-under ₹5000, preferably with good battery life."
-```
-
-A conventional flow requires the customer to:
-
-1. Search for headphones.
-2. Apply a wireless filter.
-3. Apply an ANC filter.
-4. Set a price limit.
-5. Compare products.
-6. Check stock.
-7. Select a product.
-8. Start checkout.
-9. Pay.
-
-An agentic commerce system can compress the **discovery and decision-support** portion of this process into a conversation.
-
-However, giving an AI unrestricted purchasing authority introduces a different problem:
-
-### What happens if the AI:
-
-- chooses an unavailable product?
-- selects a product above the customer's budget?
-- silently substitutes a product?
-- misinterprets quantity?
-- makes an incorrect recommendation?
-- attempts to proceed without customer approval?
-- receives a payment response that has not been verified?
-
-AgentCart is designed around these exact boundaries.
-
----
-
-# 💡 The AgentCart Approach
+## 🎯 Core Idea
 
 AgentCart separates **intelligence** from **authority**.
 
-The AI is responsible for understanding the customer's intent and helping construct a purchase decision.
+``` text
+Customer Intent
+      ↓
+AI Interpretation
+      ↓
+Catalog Validation
+      ↓
+Policy Validation
+      ↓
+Purchase Plan
+      ↓
+Human Approval
+      ↓
+Razorpay Test Payment
+      ↓
+Backend Payment Verification
+      ↓
+Order + Audit
+      ↓
+Tracking + Notifications
+```
 
-The backend is responsible for enforcing business rules.
+The key principle is:
 
-The customer remains responsible for approving the financial action.
+> **The AI can recommend and prepare. It does not receive unrestricted
+> authority to move money.**
 
-This produces three distinct layers:
+------------------------------------------------------------------------
+
+# 🎯 The Problem
+
+Traditional e-commerce is optimized around search boxes, filters,
+product pages, and checkout forms.
+
+That works well when a customer already knows what they want. It creates
+more friction when the customer has a goal instead of a specific SKU.
+
+For example:
+
+``` text
+I need wireless ANC headphones under ₹5000.
+```
+
+A conventional workflow may require the customer to:
+
+1.  Search for headphones.
+2.  Filter for wireless products.
+3.  Filter for ANC.
+4.  Set a price limit.
+5.  Compare products.
+6.  Check stock.
+7.  Select a product.
+8.  Start checkout.
+9.  Pay.
+
+Agentic commerce can compress the **discovery and decision-support**
+portion of that process into a conversation.
+
+But financial actions require stronger controls.
+
+An AI system must not be trusted to:
+
+-   silently substitute a product;
+-   override a customer's budget;
+-   ignore stock constraints;
+-   invent catalog products;
+-   approve its own recommendation;
+-   treat an unverified payment as successful.
+
+AgentCart is designed around those boundaries.
+
+------------------------------------------------------------------------
+
+# 💡 The AgentCart Approach
+
+AgentCart has three logical layers.
 
 ### 1. Intelligence
 
-The AI understands:
+The AI interprets:
 
-```text
+``` text
 What does the customer want?
-What product best matches the request?
-Why is that product relevant?
+What product is relevant?
+What constraints did the customer express?
+Why is the product relevant?
 ```
 
 ### 2. Control
 
 The backend determines:
 
-```text
+``` text
 Does the product exist?
-Is it in stock?
-Is the quantity valid?
-Is it within budget?
-Is the purchase plan in a valid state?
+Is the requested quantity valid?
+Is sufficient stock available?
+Is the purchase within budget?
+Is the plan in a valid state?
+Is payment verified?
 ```
 
 ### 3. Authorization
 
 The customer determines:
 
-```text
+``` text
 Do I actually want to purchase this?
 ```
 
-That separation is the foundation of AgentCart.
+This separation is the foundation of the application.
 
----
+------------------------------------------------------------------------
 
-# ✨ What AgentCart Does
+# ✨ Core Capabilities
 
 ## 1. Conversational Product Discovery
 
-The customer interacts with AgentCart using natural language.
+Customers can describe a shopping requirement using natural language.
 
 Example:
 
-```text
+``` text
 Buy wireless ANC headphones under ₹5000
 ```
 
-The request is processed by the AI layer and converted into structured purchase intent.
+The request is interpreted into structured purchase intent and evaluated
+against the catalog.
 
-The agent then works with the product catalog to identify an appropriate product.
-
----
+------------------------------------------------------------------------
 
 ## 2. AI-Powered Product Recommendation
 
-AgentCart does not simply return a search result.
+AgentCart can recommend a catalog product based on:
 
-It creates a purchase recommendation.
+-   product category;
+-   requested features;
+-   price;
+-   stock;
+-   quantity;
+-   customer budget.
 
-The recommendation takes into account:
+The recommendation is presented before payment.
 
-- Product category
-- Requested features
-- Price
-- Availability
-- Quantity
-- Customer budget
+------------------------------------------------------------------------
 
-The selected product is displayed to the customer before payment.
+## 3. Explainable Recommendations
 
----
+AgentCart exposes a visible:
 
-## 3. Explainable AI Decision
-
-The system provides a visible:
-
-```text
+``` text
 Why this product?
 ```
 
 explanation.
 
-For example:
+The customer can understand how the recommendation relates to the
+original request before deciding whether to approve the purchase.
 
-```text
-Selected because it matches the requested ANC and wireless
-requirements while remaining within the ₹5000 budget.
+------------------------------------------------------------------------
+
+## 4. Policy-Gated Purchasing
+
+AI output is not treated as final authority.
+
+The backend independently validates:
+
+``` text
+Product
+   ↓
+Quantity
+   ↓
+Stock
+   ↓
+Budget
+   ↓
+Purchase State
 ```
 
-The customer can therefore understand the recommendation before approving it.
+Only a valid purchase plan can proceed toward approval.
 
----
+------------------------------------------------------------------------
 
-# 🛡️ 4. Policy-Gated Purchasing
+## 5. Human Approval Gate
 
-The AI's recommendation is **not** automatically considered valid.
+The system deliberately separates:
 
-The backend performs policy validation.
-
-Conceptually:
-
-```text
-AI Recommendation
-       ↓
-Product Validation
-       ↓
-Stock Validation
-       ↓
-Quantity Validation
-       ↓
-Budget Validation
-       ↓
-Purchase Plan
-```
-
-This means business rules remain enforceable even if the AI produces an unexpected response.
-
----
-
-# 👤 5. Human Approval Gate
-
-This is one of the most important parts of AgentCart.
-
-The system intentionally separates:
-
-```text
-"AI recommends this"
+``` text
+AI recommends this
 ```
 
 from:
 
-```text
-"I approve this purchase"
+``` text
+I approve this purchase
 ```
 
-The customer must explicitly approve the purchase plan.
+The customer must explicitly approve the purchase plan before the
+payment-order stage.
 
-Only then can the payment order be created.
+------------------------------------------------------------------------
 
-This prevents the AI recommendation layer from becoming an unrestricted payment authority.
+## 6. No Silent Substitution
 
----
+AgentCart distinguishes two failure cases.
 
-# 🔄 6. Intelligent Out-of-Stock Recovery
+### Product absent from the catalog
 
-AgentCart also demonstrates how an agentic commerce system can fail gracefully.
+For a request such as:
 
-One catalog product is intentionally configured as unavailable for testing.
+``` text
+Is there any TV?
+```
 
-When the requested product has:
+when TV is not represented in the catalog, AgentCart returns a catalog
+inquiry instead of inventing an unrelated product.
 
-```text
+``` text
+CATALOG_INQUIRY
+```
+
+No purchase plan is created and no approval gate should appear.
+
+The customer can instead choose from the products actually available in
+the catalog.
+
+### Product exists but is out of stock
+
+If a genuine catalog match exists but has:
+
+``` text
 Stock = 0
 ```
 
-AgentCart does not silently purchase another product.
+AgentCart can find available alternatives.
 
-Instead:
-
-```text
-Requested product
+``` text
+Requested Product
        ↓
-Out of stock
+Out of Stock
        ↓
-Search available catalog
+Available Alternatives
        ↓
-Rank alternatives
+Customer Chooses
        ↓
-Show alternatives
-       ↓
-Customer chooses
-       ↓
-Validate selected alternative
-       ↓
-Continue only if valid
+Backend Revalidates
 ```
 
-The customer remains in control of substitution.
+The customer explicitly controls substitution.
 
-### Budget is preserved
+------------------------------------------------------------------------
 
-If the original request is:
+## 7. Budget Preservation
 
-```text
-Maximum budget = ₹5000
+The original customer budget remains authoritative.
+
+Example:
+
+``` text
+Original budget: ₹5000
+Alternative:     ₹5799
 ```
 
-and an alternative costs:
+AgentCart does not silently change:
 
-```text
-₹5799
+``` text
+₹5000 → ₹5799
 ```
 
-AgentCart does **not** silently increase the budget.
+The selected alternative must still pass the backend policy constraints.
 
-The original constraint remains authoritative.
+------------------------------------------------------------------------
 
----
+## 8. Razorpay Test-Mode Payments
 
-# 💳 7. Razorpay Payment Integration
+AgentCart uses **Razorpay Test Mode** for the hackathon.
 
-AgentCart integrates Razorpay for the transaction stage.
+The intended lifecycle is:
 
-The current implementation uses **Razorpay Test Mode**.
-
-Payment only becomes available after:
-
-```text
-Purchase Plan
-      ↓
-Policy Validation
-      ↓
-Human Approval
-```
-
-The conceptual lifecycle is:
-
-```text
+``` text
 Approved Plan
-     ↓
+      ↓
 Create Razorpay Order
-     ↓
+      ↓
 Checkout
-     ↓
+      ↓
 Payment Response
-     ↓
+      ↓
 Backend Verification
-     ↓
+      ↓
 Payment Verified
-     ↓
+      ↓
 Purchase Completed
 ```
 
-The system does not treat a frontend payment response as sufficient proof of successful payment.
+A frontend payment response is not treated as sufficient proof of
+successful payment.
 
----
+------------------------------------------------------------------------
 
-# 🔐 8. Backend Payment Verification
+## 9. Orders
 
-Payment verification happens at the backend boundary.
+After successful payment verification, the application exposes persisted
+order information.
 
-The frontend provides the payment identifiers received from the checkout process.
+Order history and order details can include:
 
-The backend verifies the payment before treating the transaction as completed.
+-   Order ID;
+-   Plan ID;
+-   Product;
+-   Quantity;
+-   Amount;
+-   Currency;
+-   Status;
+-   Razorpay order reference;
+-   Razorpay payment reference;
+-   AI recommendation explanation;
+-   Audit information;
+-   Tracking information.
 
-This is important because:
+------------------------------------------------------------------------
 
-```text
-Frontend says "success"
-```
+## 10. Fulfillment Tracking
 
-is not equivalent to:
+The current tracking system is a controlled hackathon demonstration.
 
-```text
-Backend has verified payment
-```
-
-Only the verified state can move the transaction into the completed purchase lifecycle.
-
----
-
-# 📦 9. Order Management
-
-After a successful purchase, AgentCart creates a persistent order record.
-
-Customers can access:
-
-### Order History
-
-A list of previous transactions containing information such as:
-
-- Order ID
-- Product
-- Quantity
-- Amount
-- Currency
-- Status
-- Creation time
-
-### Order Details
-
-A dedicated order view containing:
-
-- Purchase summary
-- AI recommendation explanation
-- Security boundary
-- Transaction details
-- Razorpay references
-- Audit timeline
-- Delivery tracking
-
----
-
-# 🚚 10. Order Tracking
-
-AgentCart includes a post-purchase fulfillment lifecycle.
-
-```text
+``` text
 PROCESSING
     ↓
 SHIPPED
@@ -429,9 +367,9 @@ OUT_FOR_DELIVERY
 DELIVERED
 ```
 
-The interface presents these states as a customer-friendly timeline:
+The UI presents these as:
 
-```text
+``` text
 Preparing
     ↓
 Shipped
@@ -441,61 +379,34 @@ Out for delivery
 Delivered
 ```
 
-The tracking lifecycle is a **controlled hackathon demo flow**.
+This is **not presented as a real logistics-provider integration**.
 
-It is not presented as a real logistics-provider integration.
+------------------------------------------------------------------------
 
----
+## 11. Notifications
 
-# 🔔 11. In-App Notifications
+Tracking transitions generate persisted in-app notifications.
 
-Order state changes generate notifications.
+Examples:
 
-For example:
-
-```text
+``` text
 Order is being prepared
-```
-
-then:
-
-```text
 Shipped
-```
-
-then:
-
-```text
 Out for delivery
-```
-
-then:
-
-```text
 Delivered
 ```
 
-Notifications are persisted in the database and can be marked as read individually or all at once.
+The frontend periodically checks the unread notification count.
 
-The frontend periodically checks the unread count so that the navigation header can surface new activity.
+------------------------------------------------------------------------
 
----
+## 12. Audit Trail
 
-# 🧾 12. Audit Trail
+Important transaction lifecycle events are recorded.
 
-Agentic commerce needs more than a final:
+A successful purchase can contain:
 
-```text
-Payment successful
-```
-
-It needs an understandable history of how the transaction reached that state.
-
-AgentCart therefore records significant lifecycle events.
-
-A successful transaction can contain:
-
-```text
+``` text
 PLAN_CREATED
 POLICY_VALIDATED
 PLAN_APPROVED
@@ -504,114 +415,90 @@ PAYMENT_VERIFIED
 PURCHASE_COMPLETED
 ```
 
-Fulfillment transitions can additionally create events such as:
+Fulfillment transitions can additionally produce:
 
-```text
+``` text
 FULFILLMENT_PROCESSING
 FULFILLMENT_SHIPPED
 FULFILLMENT_OUT_FOR_DELIVERY
 FULFILLMENT_DELIVERED
 ```
 
-This provides an auditable sequence of important state changes.
+This gives the transaction an inspectable lifecycle instead of only a
+final success state.
 
----
+------------------------------------------------------------------------
 
 # 🧠 System Architecture
 
-AgentCart uses a React frontend and FastAPI backend with a service-oriented internal structure.
-
-```text
+``` text
                          CUSTOMER
                             │
                             ▼
-                ┌──────────────────────┐
-                │    React Frontend    │
-                │      + Vite          │
-                ├──────────────────────┤
-                │ Commerce             │
-                │ Product Discovery    │
-                │ Approval Gate        │
-                │ Payment Gate         │
-                │ Orders               │
-                │ Tracking             │
-                │ Notifications        │
-                └──────────┬───────────┘
-                           │ HTTP
-                           ▼
-                ┌──────────────────────┐
-                │    FastAPI Backend   │
-                ├──────────────────────┤
-                │ Agent API            │
-                │ Catalog API          │
-                │ Purchase API         │
-                │ Payment API          │
-                │ Orders API           │
-                │ Tracking API         │
-                │ Notifications API    │
-                │ Audit API             │
-                └──────────┬───────────┘
-                           │
-             ┌─────────────┼──────────────┐
-             │             │              │
-             ▼             ▼              ▼
-        ┌─────────┐   ┌─────────┐   ┌───────────┐
-        │ SQLite  │   │  Groq   │   │ Razorpay  │
-        │         │   │   AI    │   │ Test Mode │
-        └─────────┘   └─────────┘   └───────────┘
+                 ┌──────────────────────┐
+                 │    React Frontend    │
+                 │       + Vite         │
+                 ├──────────────────────┤
+                 │ Demo Login           │
+                 │ Commerce             │
+                 │ Product Discovery    │
+                 │ Purchase Plan        │
+                 │ Approval Gate        │
+                 │ Payment Gate         │
+                 │ Orders               │
+                 │ Tracking             │
+                 │ Notifications        │
+                 └──────────┬───────────┘
+                            │ HTTP
+                            ▼
+                 ┌──────────────────────┐
+                 │    FastAPI Backend   │
+                 ├──────────────────────┤
+                 │ Agent API            │
+                 │ Catalog API          │
+                 │ Purchase API         │
+                 │ Payment API          │
+                 │ Orders API           │
+                 │ Tracking API         │
+                 │ Notifications API    │
+                 │ Audit API            │
+                 └──────────┬───────────┘
+                            │
+             ┌──────────────┼──────────────┐
+             │              │              │
+             ▼              ▼              ▼
+        ┌─────────┐    ┌─────────┐   ┌───────────┐
+        │ SQLite  │    │  Groq   │   │ Razorpay  │
+        │Database │    │   AI    │   │ Test Mode │
+        └─────────┘    └─────────┘   └───────────┘
 ```
 
----
+------------------------------------------------------------------------
 
 # 🏗️ Technology Stack
 
-## Frontend
+  Layer                    Technology             Purpose
+  ------------------------ ---------------------- ---------------------------------------
+  Frontend                 React                  User interface
+  Frontend tooling         Vite                   Development/build tooling
+  Frontend communication   Fetch API              Backend communication
+  Backend                  Python                 Application language
+  API                      FastAPI                REST API framework
+  Validation               Pydantic               Request/response validation
+  ORM                      SQLAlchemy             Database access
+  Database                 SQLite                 Local persistence
+  AI                       Groq                   LLM inference
+  AI model                 `openai/gpt-oss-20b`   Structured intent interpretation
+  Payments                 Razorpay               Payment order, checkout, verification
+  Infrastructure           Docker                 Containerization
+  Orchestration            Docker Compose         Multi-service setup
+  Web serving              Nginx                  Production frontend serving
 
-| Technology | Purpose |
-|---|---|
-| React | User interface |
-| Vite | Frontend build tooling |
-| JavaScript | Application logic |
-| CSS | Product interface and responsive styling |
-| Fetch API | Backend communication |
-
-## Backend
-
-| Technology | Purpose |
-|---|---|
-| Python | Backend language |
-| FastAPI | REST API framework |
-| SQLAlchemy | Database ORM |
-| Pydantic | Request/response validation |
-| SQLite | Local persistence |
-
-## AI
-
-| Technology | Purpose |
-|---|---|
-| Groq | LLM inference |
-| `openai/gpt-oss-20b` | Agent reasoning / structured intent |
-
-## Payments
-
-| Technology | Purpose |
-|---|---|
-| Razorpay | Payment order + checkout + verification |
-| Razorpay Test Mode | Safe hackathon transactions |
-
-## Infrastructure
-
-| Technology | Purpose |
-|---|---|
-| Docker | Containerization |
-| Docker Compose | Multi-service orchestration |
-| Nginx | Production frontend serving |
-
----
+------------------------------------------------------------------------
 
 # 📁 Project Structure
 
-```text
+``` text
 agentcart/
 │
 ├── backend/
@@ -628,16 +515,13 @@ agentcart/
 │   │   │
 │   │   ├── db/
 │   │   │   ├── data/
+│   │   │   │   ├── images/
 │   │   │   │   └── products.json
 │   │   │   ├── database.py
 │   │   │   ├── models.py
 │   │   │   └── seed.py
 │   │   │
 │   │   ├── schemas/
-│   │   │   ├── notification.py
-│   │   │   ├── order.py
-│   │   │   └── tracking.py
-│   │   │
 │   │   └── services/
 │   │       ├── agent_service.py
 │   │       ├── groq_adapter.py
@@ -647,10 +531,10 @@ agentcart/
 │   │
 │   ├── tests/
 │   ├── Dockerfile
-│   ├── requirements.txt
-│   └── .env
+│   └── requirements.txt
 │
 ├── frontend/
+│   ├── public/
 │   ├── src/
 │   │   ├── api/
 │   │   ├── components/
@@ -662,22 +546,19 @@ agentcart/
 │   │   │   ├── PaymentGate.jsx
 │   │   │   ├── ProductDiscovery.jsx
 │   │   │   └── PurchasePlan.jsx
-│   │   │
 │   │   ├── pages/
 │   │   │   ├── CommercePage.jsx
-│   │   │   ├── OrderDetailsPage.jsx
-│   │   │   └── OrdersPage.jsx
-│   │   │
+│   │   │   ├── OrdersPage.jsx
+│   │   │   └── OrderDetailsPage.jsx
 │   │   ├── App.jsx
 │   │   ├── App.css
 │   │   └── index.css
-│   │
 │   ├── Dockerfile
 │   └── nginx.conf
 │
 ├── docs/
 │   ├── architecture.md
-│   ├── demoflow.md
+│   ├── demo-flow.md
 │   ├── failure-handling.md
 │   └── safety.md
 │
@@ -688,462 +569,373 @@ agentcart/
 └── README.md
 ```
 
----
+------------------------------------------------------------------------
 
 # 🔄 End-to-End Purchase Flow
 
-The complete normal transaction can be represented as:
-
-```text
+``` text
 1. Demo Login
        ↓
 2. Customer describes requirement
        ↓
 3. AI interprets request
        ↓
-4. Product is selected
+4. Catalog/product validation
        ↓
-5. Backend validates product
+5. Stock + quantity + budget validation
        ↓
-6. Backend validates stock
+6. Purchase plan created
        ↓
-7. Backend validates budget
+7. Customer reviews explanation
        ↓
-8. Purchase plan created
+8. Customer approves
        ↓
-9. Customer reviews explanation
+9. Razorpay order created
        ↓
-10. Customer approves
+10. Razorpay Test Checkout
        ↓
-11. Razorpay order created
+11. Backend verifies payment
        ↓
-12. Razorpay Test Checkout
+12. Purchase completed
        ↓
-13. Backend verifies payment
+13. Order available in history
        ↓
-14. Purchase completed
+14. Fulfillment begins
        ↓
-15. Order available in history
+15. Tracking updates
        ↓
-16. Fulfillment begins
+16. Notifications generated
        ↓
-17. Tracking updates
-       ↓
-18. Notifications generated
-       ↓
-19. Audit trail updated
+17. Audit trail updated
 ```
 
----
+------------------------------------------------------------------------
 
 # 🗃️ Data Model
 
-AgentCart currently maintains database entities for the major parts of the transaction lifecycle.
+Major database entities:
 
-```text
+``` text
+Product
+PurchasePlan
+PurchaseItem
+PaymentOrder
+AuditEvent
+Fulfillment
+Notification
+```
+
+Relationship concept:
+
+``` text
 Product
    │
-   │ referenced by
    ▼
-Purchase Item
+PurchaseItem
    │
    ▼
-Purchase Plan
+PurchasePlan
+   │
+   ├──────────────► AuditEvent
    │
    ▼
-Payment Order
+PaymentOrder
    │
    ▼
 Fulfillment
+   │
+   └──────────────► Notification
 ```
 
-Additional records:
+Important state is persisted in SQLite so the backend remains the source
+of transaction state after a frontend refresh.
 
-```text
-Purchase Plan ───────► Audit Events
-Payment Order ───────► Notifications
-```
-
-The major database entities are:
-
-- `products`
-- `purchase_plans`
-- `purchase_items`
-- `payment_orders`
-- `audit_events`
-- `fulfillments`
-- `notifications`
-
----
+------------------------------------------------------------------------
 
 # 🧩 API Surface
 
-The backend exposes separate API areas for each responsibility.
+### Agent
 
-## Agent
-
-```text
+``` text
 POST /api/agent/purchase
 POST /api/agent/select-product
 ```
 
-Used for natural-language purchase requests and explicit alternative/product selection.
+### Catalog
 
-## Catalog
-
-```text
+``` text
 GET /api/catalog/products
 GET /api/catalog/products/{product_id}
 GET /api/catalog/search
 ```
 
-Used for product discovery.
+### Purchase Plans
 
-## Purchase Plans
-
-```text
+``` text
 GET  /api/purchase/plans/{plan_id}
 POST /api/purchase/plans/{plan_id}/approve
 POST /api/purchase/plans/{plan_id}/reject
 ```
 
-Used for purchase-plan inspection and human authorization.
+### Payments
 
-## Payments
-
-```text
+``` text
 POST /api/payment/plans/{plan_id}/orders
 GET  /api/payment/orders/{payment_order_id}
 POST /api/payment/orders/{payment_order_id}/verify
 ```
 
-Used for payment-order creation and verification.
+### Orders
 
-## Orders
-
-```text
+``` text
 GET /api/orders/
 GET /api/orders/{order_id}
 ```
 
-Used for order history and order details.
+### Tracking
 
-## Tracking
-
-```text
+``` text
 GET  /api/orders/{order_id}/tracking
 POST /api/orders/{order_id}/tracking/advance
 ```
 
-Used for the demo fulfillment lifecycle.
+### Notifications
 
-## Notifications
-
-```text
+``` text
 GET  /api/notifications/
 GET  /api/notifications/unread-count
 POST /api/notifications/{notification_id}/read
 POST /api/notifications/read-all
 ```
 
-## Audit
+### Audit
 
-```text
+``` text
 GET /api/audit/
 GET /api/audit/plans/{plan_id}
 ```
 
----
+------------------------------------------------------------------------
 
-# 🧪 Reliability and Failure Scenarios
+# 🧪 Verified Demo Scenarios
 
-AgentCart was built around the idea that a strong agentic-commerce demo should demonstrate failure handling rather than only the happy path.
+  Scenario                            Expected Result
+  ----------------------------------- -----------------------------------------------
+  Natural-language product request    AI recommendation/purchase plan
+  `Is there any TV?`                  `CATALOG_INQUIRY`, no purchase plan
+  Matching product with zero stock    Alternatives shown
+  Customer selects alternative        Product is revalidated
+  Alternative above original budget   Original budget remains enforced
+  Customer rejects plan               Purchase stops
+  Successful test payment             Backend verifies and completes purchase
+  Tracking transition                 Fulfillment, audit, and notification update
+  Page refresh                        Persisted state can be reloaded
+  Docker startup                      Frontend and backend run as separate services
 
-The verified local scenarios include:
-
-### Normal Purchase
-
-```text
-Request
-→ Recommendation
-→ Policy Validation
-→ Approval
-→ Payment
-→ Verification
-→ Completion
-```
-
-### Out-of-Stock Recovery
-
-```text
-Unavailable Product
-→ Alternatives
-→ Customer Selection
-→ Revalidation
-```
-
-### Purchase Rejection
-
-```text
-Purchase Plan
-→ Customer Rejects
-→ Purchase Stops
-```
-
-### Tracking Lifecycle
-
-```text
-Preparing
-→ Shipped
-→ Out for Delivery
-→ Delivered
-```
-
-### Refresh Persistence
-
-Order information, audit history, and tracking state can be reloaded from the backend after refreshing the application.
-
----
+------------------------------------------------------------------------
 
 # 🔒 Security Model
 
-AgentCart follows a layered security model.
+AgentCart follows a layered security model:
 
-## AI Boundary
+``` text
+AI Boundary
+     ↓
+Backend Policy Boundary
+     ↓
+Human Authorization Boundary
+     ↓
+Payment Boundary
+     ↓
+Verification Boundary
+     ↓
+Audit Boundary
+```
 
-The model is treated as an intelligent input/decision layer, not as a trusted business-rule engine.
+Core invariants:
 
-## Backend Boundary
+``` text
+AI recommendation ≠ authorization
 
-The backend validates:
+AI output ≠ business-rule validation
 
-- Product
-- Quantity
-- Stock
-- Budget
-- Purchase state
-- Payment state
+Out-of-stock ≠ silent substitution
 
-## Human Boundary
+Alternative price ≠ automatic budget increase
 
-The customer explicitly approves the transaction.
+Frontend payment success ≠ verified payment
 
-## Payment Boundary
+Demo tracking ≠ real logistics
 
-Payment is verified on the backend before the purchase is considered completed.
+Demo login ≠ production authentication
+```
 
-## Secret Boundary
-
-Sensitive credentials are provided through environment variables.
-
-Secrets must never be hardcoded or committed.
-
-The repository ignores local `.env` files.
-
----
+------------------------------------------------------------------------
 
 # 🔑 Environment Configuration
 
-Create:
+Create a local:
 
-```text
+``` text
 backend/.env
 ```
 
-using `.env.example` as a template.
+using `.env.example` as the template.
 
-Required variables:
+Expected variables:
 
-```env
+``` env
 RAZORPAY_KEY_ID=
 RAZORPAY_KEY_SECRET=
 GROQ_API_KEY=
 ```
 
-### Important
+Never commit or publish actual secret values.
 
-Never commit:
+Do not expose credentials in:
 
-```text
-backend/.env
-```
+-   source code;
+-   frontend bundles;
+-   screenshots;
+-   README files;
+-   Git history;
+-   demo recordings.
 
-Never expose:
-
-```text
-RAZORPAY_KEY_SECRET
-GROQ_API_KEY
-```
-
-in frontend code, screenshots, README files, GitHub commits, or demo recordings.
-
----
+------------------------------------------------------------------------
 
 # 🐳 Docker
 
-AgentCart is containerized as two services:
+Start the complete stack:
 
-```text
-agentcart-frontend
-        +
-agentcart-backend
-```
-
-The frontend is built using Node/Vite and served by Nginx.
-
-The backend runs FastAPI with Uvicorn.
-
-Start the stack:
-
-```bash
+``` bash
 docker compose up --build
 ```
 
 Open:
 
-```text
+``` text
+Frontend:
 http://localhost
-```
 
 Backend:
-
-```text
 http://localhost:8000
+
+Swagger:
+http://localhost:8000/docs
 ```
 
-FastAPI Swagger documentation:
+Check:
 
-```text
-http://localhost:8000/docs
+``` bash
+docker compose ps
 ```
 
 Stop:
 
-```bash
+``` bash
 docker compose down
 ```
 
----
+The SQLite database is persisted through the configured Docker volume
+mapping.
+
+------------------------------------------------------------------------
 
 # 👤 Demo Identity
 
-The current hackathon UI uses a fictional demo customer:
+The hackathon UI uses a fictional demo customer:
 
-```text
-Name:
-Arjun Mehta
-
-Customer ID:
-AC-DEMO-001
-
-Phone:
-+91 9876543210
-
-Email:
-arjun.mehta@demo.agentcart.ai
-
-Account:
-Demo Customer
-
-Currency:
-INR
-
-Location:
-Bengaluru, India
-
-Payment:
-Razorpay Test Mode
+``` text
+Name:        Arjun Mehta
+Customer ID: AC-DEMO-001
+Phone:       +91 9876543210
+Email:       arjun.mehta@demo.agentcart.ai
+Account:     Demo Customer
+Currency:    INR
+Location:    Bengaluru, India
+Payment:     Razorpay Test Mode
 ```
 
-The login is intentionally designed as a frictionless hackathon demo and is **not production authentication**.
+This is a frictionless hackathon identity and **not production
+authentication**.
 
----
+------------------------------------------------------------------------
 
 # 🎬 Recommended Judge Demonstration
 
-A concise demonstration should follow this sequence:
+The strongest concise sequence is:
 
-```text
+``` text
 1. Login
-2. Enter natural-language purchase request
-3. Show AI recommendation
-4. Show "Why this product?"
-5. Show policy validation
-6. Show security boundary
-7. Approve purchase
-8. Complete Razorpay Test Mode payment
-9. Show successful audit trail
-10. Open order details
-11. Show tracking
-12. Advance tracking
-13. Show notification
-14. Demonstrate out-of-stock recovery
-15. Demonstrate rejection
+2. Natural-language request
+3. AI recommendation
+4. "Why this product?"
+5. Policy boundary
+6. Human approval
+7. Razorpay Test Mode
+8. Backend payment verification
+9. Order details
+10. Audit trail
+11. Tracking
+12. Notifications
+13. Out-of-stock recovery
+14. Rejection
 ```
 
-Recommended request:
+Primary request:
 
-```text
+``` text
 Buy wireless ANC headphones under ₹5000
 ```
 
-The detailed demo script is available in:
+Failure request:
 
-```text
-docs/demoflow.md
+``` text
+Is there any TV?
 ```
 
----
+------------------------------------------------------------------------
 
-# 📚 Documentation
+# 🚧 Current Scope vs Production Scope
 
-AgentCart includes dedicated documentation for the most important system concerns.
+## Current Hackathon Scope
 
-### Architecture
+-   Fictional demo customer
+-   Controlled local catalog
+-   SQLite persistence
+-   Groq-based intent interpretation
+-   Razorpay Test Mode
+-   Human approval gate
+-   Demo fulfillment tracking
+-   Poll-based notification updates
+-   Dockerized frontend/backend
 
-```text
-docs/architecture.md
-```
+## Production Evolution
 
-Explains the technical architecture, services, data flow, APIs, and system boundaries.
+A production deployment would additionally require:
 
-### Demo Flow
+-   strong authentication;
+-   customer-level authorization and data isolation;
+-   production database and backups;
+-   secure secret management;
+-   payment webhooks;
+-   idempotency and replay protection;
+-   inventory reservation and concurrency controls;
+-   real logistics integration;
+-   refunds/cancellations;
+-   rate limiting;
+-   monitoring and alerting;
+-   structured logging;
+-   stronger audit retention;
+-   privacy and retention controls.
 
-```text
-docs/demoflow.md
-```
+------------------------------------------------------------------------
 
-Contains the recommended judge presentation and demonstration sequence.
+# 🏆 Razorpay Track 01 Positioning
 
-### Failure Handling
+AgentCart is designed around:
 
-```text
-docs/failure-handling.md
-```
-
-Documents out-of-stock handling, rejection, payment failures, invalid states, and tracking failures.
-
-### Safety
-
-```text
-docs/safety.md
-```
-
-Explains AI boundaries, human approval, payment security, secret handling, and production considerations.
-
----
-
-# 🏆 Razorpay AI Buildathon Positioning
-
-AgentCart is designed for:
-
-## Track 01 — AI Growth & Agentic Commerce
-
-The project explores a future where AI agents can participate directly in commerce.
-
-Instead of treating the AI as a chatbot sitting beside an existing shopping experience, AgentCart makes the agent part of the purchasing workflow:
-
-```text
+``` text
 Intent
   ↓
 Discovery
@@ -1159,15 +951,15 @@ Transaction
 Fulfillment
 ```
 
-The project specifically focuses on the challenge of making this workflow:
+The project emphasizes five properties:
 
 ### Explainable
 
-The customer can understand why a product was recommended.
+The customer can understand the recommendation.
 
 ### Bounded
 
-The backend enforces budget, stock, quantity, and lifecycle constraints.
+The backend enforces commerce constraints.
 
 ### Gated
 
@@ -1175,249 +967,53 @@ Human approval is required before payment.
 
 ### Auditable
 
-Important transaction state transitions are recorded.
+Important lifecycle events are recorded.
 
 ### Recoverable
 
-The system demonstrates graceful handling of unavailable products and rejected decisions.
+Unavailable products and rejected decisions have controlled recovery
+paths.
 
----
+------------------------------------------------------------------------
 
-# 🚧 Current Scope vs Production Scope
+# 📚 Documentation
 
-AgentCart is a hackathon implementation designed to demonstrate the core agentic-commerce architecture.
+  -----------------------------------------------------------------------
+  Document                            Purpose
+  ----------------------------------- -----------------------------------
+  `docs/architecture.md`              Technical architecture, components,
+                                      data flow, APIs, and invariants
 
-Some components are intentionally simplified.
+  `docs/demo-flow.md`                 Judge presentation script and
+                                      demonstration checklist
 
-## Current Hackathon Implementation
+  `docs/failure-handling.md`          Failure scenarios, expected
+                                      behavior, and recovery paths
 
-- Fictional demo customer
-- Local catalog
-- SQLite persistence
-- Razorpay Test Mode
-- Demo fulfillment tracking
-- Controlled tracking advancement
-- Poll-based unread notification updates
+  `docs/safety.md`                    AI, payment, data, identity, and
+                                      production security boundaries
+  -----------------------------------------------------------------------
 
-## Production Evolution
-
-A production deployment would additionally require:
-
-- Strong authentication
-- Authorization and customer isolation
-- Production database
-- Persistent cloud storage
-- Secure secret management
-- Payment webhooks
-- Idempotency controls
-- Inventory reservation
-- Real logistics integration
-- Rate limiting
-- Monitoring and alerting
-- Structured logging
-- Abuse prevention
-- Stronger audit retention
-- Production-grade session management
-
-These are deliberately outside the current hackathon scope.
-
----
-
-# 📈 Future Evolution
-
-The architecture can be extended toward a more complete agentic-commerce platform.
-
-Potential next steps include:
-
-```text
-Multi-merchant catalog
-        ↓
-Agent-readable product feeds
-        ↓
-Merchant-specific policies
-        ↓
-Personalized preferences
-        ↓
-Upsell / cross-sell intelligence
-        ↓
-Campaign-aware recommendations
-        ↓
-Real fulfillment integrations
-        ↓
-Production-grade agent authorization
-```
-
-The existing separation between:
-
-```text
-AI
-Policy
-Human Approval
-Payment
-```
-
-provides the foundation for those extensions.
-
----
-
-# 🧭 Design Principles
-
-AgentCart follows five core principles.
-
-## 1. AI should assist, not silently act
-
-The customer should understand what the agent intends to purchase.
-
-## 2. Business rules belong in the backend
-
-AI output is not a replacement for deterministic policy enforcement.
-
-## 3. Money actions need an explicit boundary
-
-Payment should require a clear authorization step.
-
-## 4. Failure should be visible and recoverable
-
-When something cannot proceed, the system should explain why and provide a valid next step.
-
-## 5. Important actions should be auditable
-
-A transaction should have a traceable lifecycle rather than only a final success state.
-
----
-
-# 📊 Example Successful Transaction
-
-A representative successful purchase looks like:
-
-```text
-Customer Request
-────────────────────────────────────
-Buy wireless ANC headphones under ₹5000
-
-AI Recommendation
-────────────────────────────────────
-SoundMax Pro ANC
-₹4,499
-In stock
-
-Policy
-────────────────────────────────────
-Budget: ₹5,000
-Price:  ₹4,499
-Stock:  Available
-Result: PASS
-
-Human Approval
-────────────────────────────────────
-Approved
-
-Payment
-────────────────────────────────────
-Razorpay Test Mode
-Result: VERIFIED
-
-Purchase
-────────────────────────────────────
-Status: COMPLETED
-
-Audit
-────────────────────────────────────
-PLAN_CREATED
-POLICY_VALIDATED
-PLAN_APPROVED
-PAYMENT_ORDER_CREATED
-PAYMENT_VERIFIED
-PURCHASE_COMPLETED
-
-Fulfillment
-────────────────────────────────────
-PROCESSING
-→ SHIPPED
-→ OUT_FOR_DELIVERY
-→ DELIVERED
-```
-
----
-
-# ⚠️ Demo and Security Disclaimer
-
-AgentCart is a hackathon project.
-
-The current implementation uses:
-
-- Razorpay Test Mode
-- A fictional demo customer
-- A local/demo catalog
-- Demo fulfillment tracking
-
-No real customer identity or real-world delivery operation is represented by the demo.
-
-Never commit or publish actual API secrets.
-
----
-
-# 🧑‍💻 Development Status
-
-The core application flow has been implemented and locally reliability-tested.
-
-Verified scenarios:
-
-- ✅ Normal purchase success
-- ✅ AI recommendation and explanation
-- ✅ Policy validation
-- ✅ Human approval gate
-- ✅ Razorpay Test Mode payment
-- ✅ Payment verification
-- ✅ Order history
-- ✅ Order details
-- ✅ Audit trail
-- ✅ Out-of-stock recovery
-- ✅ Customer-selected alternatives
-- ✅ Purchase rejection
-- ✅ Tracking lifecycle
-- ✅ In-app notifications
-- ✅ Refresh persistence
-- ✅ Dockerized frontend/backend
-
----
-
-# 🚀 Quick Start
-
-```bash
-# Clone the repository
-git clone <repository-url>
-
-# Enter the project
-cd agentcart
-
-# Configure backend secrets
-# Create backend/.env using .env.example
-
-# Start the application
-docker compose up --build
-```
-
-Then open:
-
-```text
-http://localhost
-```
-
-API documentation:
-
-```text
-http://localhost:8000/docs
-```
-
----
+------------------------------------------------------------------------
 
 # 📌 One-Line Summary
 
-> **AgentCart is an explainable, policy-bounded, human-approved AI commerce agent that takes a natural-language shopping request from intent to Razorpay payment, order tracking, notifications, and an auditable transaction lifecycle.**
+> **AgentCart is an explainable, policy-bounded, human-approved AI
+> commerce agent that takes natural-language shopping intent through
+> recommendation, validation, Razorpay test payment, order tracking,
+> notifications, and an auditable transaction lifecycle.**
 
----
+------------------------------------------------------------------------
 
-## License
+## ⚠️ Hackathon Disclaimer
 
-This project was created as a hackathon project.
+AgentCart is a hackathon implementation.
+
+The current demonstration uses:
+
+-   Razorpay Test Mode;
+-   a fictional customer identity;
+-   a controlled catalog;
+-   simulated/controlled fulfillment tracking.
+
+It is not presented as a production commerce or logistics system.

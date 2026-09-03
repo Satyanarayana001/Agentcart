@@ -11,12 +11,30 @@ from app.api.tracking import router as tracking_router
 from app.api.notifications import (
     router as notifications_router,
 )
+from app.db.seed import init_database
+from pathlib import Path
+from fastapi.staticfiles import StaticFiles
 
 
 app = FastAPI(
     title="AgentCart API",
     description="Explainable, bounded, and approval-gated AI commerce system",
     version="1.0.0",
+)
+init_database()
+
+
+IMAGES_DIR = (
+    Path(__file__).resolve().parent
+    / "db"
+    / "data"
+    / "images"
+)
+
+app.mount(
+    "/static/images",
+    StaticFiles(directory=IMAGES_DIR),
+    name="product-images",
 )
 
 
@@ -37,6 +55,7 @@ app.include_router(payment_router)
 app.include_router(orders_router)
 app.include_router(tracking_router)
 app.include_router(notifications_router)
+
 
 @app.get("/")
 def health_check():

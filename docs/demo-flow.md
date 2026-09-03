@@ -4,22 +4,23 @@
 
 The AgentCart demo should communicate one central idea:
 
-> **An AI agent can make commerce dramatically easier without receiving unrestricted authority over the customer's money.**
+> **An AI agent can make commerce dramatically easier without receiving
+> unrestricted authority over the customer's money.**
 
-The demonstration should therefore show both:
+The presentation should demonstrate both:
 
-1. The intelligent path — understanding a request and completing a purchase.
-2. The controlled path — handling failure, requiring approval, and maintaining an audit trail.
+1.  the intelligent path --- understanding intent and preparing a
+    purchase;
+2.  the controlled path --- handling failure, requiring approval,
+    verifying payment, and maintaining an audit trail.
 
----
+------------------------------------------------------------------------
 
 # 2. Demo Environment
 
-Start the application using the final local/Docker setup.
+Use the final local or Docker setup.
 
-Expected endpoints:
-
-```text
+``` text
 Frontend
 http://localhost
 
@@ -30,102 +31,99 @@ Swagger
 http://localhost:8000/docs
 ```
 
-Use Razorpay Test Mode.
+Payment mode:
 
-Do not display secret environment variables during the demo.
-
----
-
-# 3. Demo Customer
-
-Use the fictional demo customer:
-
-```text
-Name:
-Arjun Mehta
-
-Customer ID:
-AC-DEMO-001
-
-Phone:
-+91 9876543210
-
-Email:
-arjun.mehta@demo.agentcart.ai
-
-Location:
-Bengaluru, India
-
-Account:
-Demo Customer
-
-Payment:
+``` text
 Razorpay Test Mode
 ```
 
-The login exists to provide a clean hackathon demonstration and is not production authentication.
+Do not display:
 
----
+-   API keys;
+-   `.env` files;
+-   secret values;
+-   private credentials.
 
-# 4. Recommended Primary Scenario
+------------------------------------------------------------------------
 
-Use the following request:
+# 3. Demo Customer
 
-```text
+Use the fictional demo identity configured by the application:
+
+``` text
+Name:        Arjun Mehta
+Customer ID: AC-DEMO-001
+Phone:       +91 9876543210
+Email:       arjun.mehta@demo.agentcart.ai
+Location:    Bengaluru, India
+Account:     Demo Customer
+Payment:     Razorpay Test Mode
+```
+
+This is a frictionless hackathon identity and is not production
+authentication.
+
+------------------------------------------------------------------------
+
+# 4. Primary Scenario
+
+Use:
+
+``` text
 Buy wireless ANC headphones under ₹5000
 ```
 
-This scenario demonstrates:
+This demonstrates:
 
-- Natural-language intent
-- AI recommendation
-- Product information
-- Budget validation
-- Human approval
-- Razorpay payment
-- Payment verification
-- Order creation
-- Audit trail
+-   natural-language intent;
+-   AI recommendation;
+-   catalog validation;
+-   product information;
+-   budget validation;
+-   human approval;
+-   Razorpay Test Mode;
+-   backend payment verification;
+-   order creation;
+-   audit trail.
 
----
+------------------------------------------------------------------------
 
-# 5. Demo Script
+# 5. Step 1 --- Introduce AgentCart
 
-## Step 1 — Introduce AgentCart
-
-Start on the login screen.
+Start at the login screen.
 
 Say:
 
-> AgentCart is an AI-powered commerce agent. Instead of manually searching through an e-commerce site, the customer can describe what they want. The agent finds and prepares a purchase, but payment is always behind a human approval gate.
+> AgentCart is an AI-powered commerce agent. Instead of manually
+> searching through an e-commerce site, the customer can describe what
+> they want. The agent understands the request and prepares a purchase,
+> but payment remains behind a human approval gate.
 
-Continue using the demo account.
+Continue with the demo account.
 
----
+------------------------------------------------------------------------
 
-## Step 2 — Submit a Natural-Language Request
+# 6. Step 2 --- Submit the Request
 
 Enter:
 
-```text
+``` text
 Buy wireless ANC headphones under ₹5000
 ```
 
-Submit the request.
-
 Explain:
 
-> The customer is expressing a goal, not selecting a specific SKU. AgentCart uses AI to understand the intent and identify a suitable catalog product.
+> The customer is expressing a goal rather than selecting a specific
+> SKU. AgentCart uses AI to interpret that intent against a controlled
+> catalog.
 
----
+------------------------------------------------------------------------
 
-## Step 3 — Show the Recommendation
+# 7. Step 3 --- Show the Recommendation
 
-Show the selected product.
+A representative catalog recommendation is:
 
-A representative product is:
-
-```text
+``` text
 SoundMax Pro ANC
 ₹4,499
 In stock
@@ -133,31 +131,42 @@ In stock
 
 Point out:
 
-- Product image/details
-- Price
-- Availability
-- Requested features
-- Purchase plan
+-   product image;
+-   product details;
+-   price;
+-   availability;
+-   requested characteristics;
+-   purchase plan.
 
----
+------------------------------------------------------------------------
 
-# 6. Show "Why This Product?"
+# 8. Step 4 --- Show "Why This Product?"
 
 Open the explanation.
 
-Explain:
+Say:
 
-> The recommendation is not hidden inside the agent. The customer can see why the product matches the request.
+> The recommendation is visible to the customer instead of being hidden
+> inside the agent. This makes the AI decision understandable before
+> authorization.
 
-The explanation should connect the recommendation to the customer's requirements and budget.
+Connect the explanation to:
 
----
+``` text
+Customer request
+      ↓
+Product match
+      ↓
+Budget
+```
 
-# 7. Show the Policy Boundary
+------------------------------------------------------------------------
+
+# 9. Step 5 --- Show the Policy Boundary
 
 Highlight:
 
-```text
+``` text
 AI decision
      ↓
 Policy check
@@ -169,95 +178,98 @@ Payment
 
 Say:
 
-> This is the critical control boundary. The AI can recommend the product, but it cannot authorize the customer's payment.
+> This is the critical control boundary. The AI can recommend and
+> prepare the purchase, but it cannot authorize the customer's payment.
 
----
+------------------------------------------------------------------------
 
-# 8. Show the Purchase Plan
+# 10. Step 6 --- Review the Purchase Plan
 
 Point out:
 
-- Product
-- Quantity
-- Unit price
-- Total
-- Maximum budget
-- Explanation
-- Policy status
+-   product;
+-   quantity;
+-   unit price;
+-   total;
+-   maximum budget;
+-   explanation;
+-   policy result.
 
-For the example:
+Representative values:
 
-```text
-Product:
-SoundMax Pro ANC
-
-Price:
-₹4,499
-
-Budget:
-₹5,000
-
-Result:
-Within budget
+``` text
+Product: SoundMax Pro ANC
+Price:   ₹4,499
+Budget:  ₹5,000
+Result:  Within budget
 ```
 
----
+------------------------------------------------------------------------
 
-# 9. Human Approval
+# 11. Step 7 --- Human Approval
 
 Click the explicit approval action.
 
-Explain:
+Say:
 
 > This action is performed by the customer, not by the AI.
 
 The backend changes the plan into an approved state.
 
-The payment flow is now allowed to continue.
+Payment can now proceed.
 
----
+------------------------------------------------------------------------
 
-# 10. Razorpay Test Payment
+# 12. Step 8 --- Razorpay Test Payment
 
-Proceed to the Razorpay Test Mode checkout.
+Open the Razorpay Test Mode checkout.
 
 Complete the test payment.
 
 Important:
 
-- Use Test Mode.
-- Do not use real payment credentials.
-- Do not claim that real money was transferred.
+-   use Test Mode;
+-   do not use real payment credentials;
+-   do not claim that real money was transferred.
 
-After checkout, the backend verifies the payment.
+Explain:
 
----
+> The checkout response is not the final source of truth. AgentCart
+> verifies the payment on the backend before completing the purchase.
 
-# 11. Show the Successful Purchase
+------------------------------------------------------------------------
 
-After successful verification, show the order.
+# 13. Step 9 --- Show the Completed Order
 
-A representative transaction may be:
+Show the resulting order.
 
-```text
-Amount:
-₹4,499
+Representative:
 
-Status:
-Completed
+``` text
+Amount:  ₹4,499
+Status:  Completed
 ```
 
-Then open the order details.
+Then open order details.
 
----
+Point out:
 
-# 12. Show the Audit Trail
+-   Order ID;
+-   Plan ID;
+-   amount;
+-   payment status;
+-   Razorpay order reference;
+-   Razorpay payment reference.
+
+------------------------------------------------------------------------
+
+# 14. Step 10 --- Show the Audit Trail
 
 Open the audit timeline.
 
-A successful transaction should show events similar to:
+Expected lifecycle:
 
-```text
+``` text
 PLAN_CREATED
 POLICY_VALIDATED
 PLAN_APPROVED
@@ -268,36 +280,18 @@ PURCHASE_COMPLETED
 
 Say:
 
-> The system doesn't only remember the final result. It records the important decisions and state transitions that led to it.
+> The system does not only remember the final result. It records the
+> important state transitions that led to it.
 
-This is especially relevant for agentic commerce.
+------------------------------------------------------------------------
 
----
-
-# 13. Show Order Details
-
-Point out:
-
-```text
-Order ID
-Plan ID
-Amount
-Payment status
-Razorpay Order ID
-Razorpay Payment ID
-```
-
-Then show the AI explanation and security boundary again.
-
----
-
-# 14. Demonstrate Tracking
+# 15. Step 11 --- Demonstrate Tracking
 
 Open the tracking section.
 
-The demo lifecycle is:
+The controlled demo lifecycle is:
 
-```text
+``` text
 Preparing
     ↓
 Shipped
@@ -311,20 +305,25 @@ Advance the tracking state.
 
 After each transition, show:
 
-- Current tracking state
-- Completed states
-- Audit update
-- Notification
+-   current state;
+-   completed states;
+-   audit update;
+-   notification.
 
----
+Clarify:
 
-# 15. Demonstrate Notifications
+> This is a controlled hackathon fulfillment flow, not a live logistics
+> integration.
+
+------------------------------------------------------------------------
+
+# 16. Step 12 --- Demonstrate Notifications
 
 Open the notification center.
 
-Show messages such as:
+Show notifications such as:
 
-```text
+``` text
 Order is being prepared
 Shipped
 Out for delivery
@@ -333,82 +332,130 @@ Delivered
 
 Explain:
 
-> Notifications are generated when the backend changes fulfillment state.
+> Notifications are generated when the backend changes the fulfillment
+> state.
 
----
+------------------------------------------------------------------------
 
-# 16. Demonstrate Out-of-Stock Recovery
+# 17. Step 13 --- Demonstrate an Unavailable Catalog Request
 
-This is the recommended failure demonstration.
+Use:
+
+``` text
+Is there any TV?
+```
+
+Because the current demo catalog does not represent TV as an available
+catalog category, AgentCart should return:
+
+``` text
+CATALOG_INQUIRY
+```
+
+Expected UX:
+
+``` text
+Requested category
+       ↓
+Not represented in catalog
+       ↓
+Explain unavailability
+       ↓
+Show available catalog
+       ↓
+Customer chooses if desired
+```
+
+Important:
+
+-   no purchase plan should be created;
+-   no approval gate should appear;
+-   no payment should start;
+-   no unrelated product should be silently selected.
+
+Say:
+
+> The agent does not invent a product just to complete the workflow. It
+> tells the customer that the requested category is unavailable and lets
+> the customer choose something that actually exists.
+
+------------------------------------------------------------------------
+
+# 18. Step 14 --- Demonstrate Out-of-Stock Recovery
 
 Use the intentionally unavailable catalog product.
 
-The system should identify that:
+Expected:
 
-```text
-Requested product
-=
-Out of stock
+``` text
+Requested Product
+       ↓
+Stock = 0
+       ↓
+Alternatives
+       ↓
+Customer Chooses
+       ↓
+Backend Revalidation
+       ↓
+Purchase Plan
 ```
 
-Instead of silently choosing another product, AgentCart displays available alternatives.
+Say:
 
-Explain:
+> An agent should not silently substitute something the customer never
+> selected.
 
-> An agent should not silently substitute something the customer did not choose.
+------------------------------------------------------------------------
 
----
+# 19. Step 15 --- Demonstrate Alternative Selection
 
-# 17. Customer Selects an Alternative
-
-Show the alternatives.
+Show the available alternatives.
 
 The customer explicitly chooses one.
 
-The system then revalidates:
+The backend revalidates:
 
-```text
+``` text
 Product
 Stock
 Quantity
 Budget
 ```
 
-Only a valid alternative can continue.
+Only a valid selection can continue.
 
----
+------------------------------------------------------------------------
 
-# 18. Demonstrate Budget Preservation
+# 20. Step 16 --- Demonstrate Budget Preservation
 
 Use the scenario where an alternative is above the original budget.
 
 Example:
 
-```text
-Original budget:
-₹5000
-
-Alternative:
-₹5799
+``` text
+Original budget: ₹5000
+Alternative:     ₹5799
 ```
 
-Explain:
+Say:
 
-> AgentCart does not silently raise the customer's budget just because the AI found another product.
+> AgentCart does not silently raise the customer's budget because the
+> original product became unavailable.
 
-The backend retains the original constraint.
+The original constraint remains authoritative.
 
----
+------------------------------------------------------------------------
 
-# 19. Demonstrate Rejection
+# 21. Step 17 --- Demonstrate Rejection
 
 Create another purchase plan.
 
-Instead of approving it, reject the plan.
+Instead of approving it, reject it.
 
 Show:
 
-```text
+``` text
 Purchase Plan
       ↓
 Customer Rejects
@@ -416,118 +463,133 @@ Customer Rejects
 Purchase Stops
 ```
 
-Explain:
+Say:
 
-> The customer's rejection is authoritative. The AI recommendation cannot override it.
+> The customer's rejection is authoritative. The AI recommendation
+> cannot override it.
 
----
+------------------------------------------------------------------------
 
-# 20. Suggested 5-Minute Presentation
+# 22. Suggested 5-Minute Presentation
 
-## 0:00–0:30
+## 0:00--0:30 --- Problem + Concept
 
-Problem + concept.
+> Shopping intent is increasingly conversational, but financial actions
+> still need strong controls.
 
-> Shopping intent is often conversational, but payment must remain controlled.
+## 0:30--1:15 --- Natural-Language Request
 
-## 0:30–1:15
+Enter:
 
-Natural-language request.
-
-```text
+``` text
 Buy wireless ANC headphones under ₹5000
 ```
 
-Show recommendation.
+Show the recommendation.
 
-## 1:15–1:45
+## 1:15--1:45 --- Explainability + Safety
 
 Show:
 
-```text
+``` text
 Why this product?
 ```
 
-and the security boundary.
+and:
 
-## 1:45–2:30
+``` text
+AI → Policy → Human Approval → Payment
+```
 
-Approve and complete Razorpay Test Mode payment.
+## 1:45--2:30 --- Approval + Payment
 
-## 2:30–3:00
+Approve and complete the Razorpay Test Mode payment.
 
-Show order details and audit trail.
+## 2:30--3:00 --- Order + Audit
 
-## 3:00–3:45
+Show order details and the audit timeline.
 
-Show tracking and notifications.
+## 3:00--3:45 --- Tracking + Notifications
 
-## 3:45–4:30
+Advance tracking and show backend-driven notifications.
 
-Demonstrate out-of-stock recovery.
+## 3:45--4:30 --- Failure Recovery
 
-## 4:30–5:00
+Demonstrate unavailable/out-of-stock handling and explicit alternative
+selection.
 
-Demonstrate rejection and close.
+## 4:30--5:00 --- Rejection + Close
 
----
+Reject another plan and deliver the closing statement.
 
-# 21. Recommended Closing Statement
+------------------------------------------------------------------------
 
-Finish with:
+# 23. Recommended Closing Statement
 
-> AgentCart makes AI commerce actionable without making it uncontrolled. The agent understands the customer's intent, recommends and prepares the purchase, the backend enforces the policies, the customer approves the financial action, and the complete lifecycle remains auditable.
+> AgentCart makes AI commerce actionable without making it uncontrolled.
+> The agent understands the customer's intent, recommends and prepares
+> the purchase, the backend enforces the policies, the customer approves
+> the financial action, payment is verified, and the lifecycle remains
+> auditable.
 
----
+------------------------------------------------------------------------
 
-# 22. Demo Checklist
+# 24. Demo Checklist
 
-Before the final presentation:
+## Application
 
-### Application
+-   [ ] Frontend loads
+-   [ ] Backend is healthy
+-   [ ] Login works
+-   [ ] Catalog loads
 
-- [ ] Frontend loads
-- [ ] Backend is healthy
-- [ ] Login works
-- [ ] Catalog loads
+## AI
 
-### AI
+-   [ ] Natural-language request works
+-   [ ] Recommendation appears
+-   [ ] Explanation appears
+-   [ ] Missing catalog category returns `CATALOG_INQUIRY`
 
-- [ ] Natural-language request works
-- [ ] Recommendation appears
-- [ ] Explanation appears
+## Policy
 
-### Policy
+-   [ ] Budget validation works
+-   [ ] Stock validation works
+-   [ ] Quantity validation works
+-   [ ] Approval gate works
+-   [ ] Rejection stops progression
 
-- [ ] Budget validation works
-- [ ] Stock validation works
-- [ ] Quantity validation works
-- [ ] Approval gate works
+## Payment
 
-### Payment
+-   [ ] Razorpay Test Mode works
+-   [ ] Payment verification works
+-   [ ] Purchase completion works
 
-- [ ] Razorpay Test Mode works
-- [ ] Payment verification works
-- [ ] Purchase completion works
+## Post-Purchase
 
-### Post-purchase
+-   [ ] Order history works
+-   [ ] Order details work
+-   [ ] Audit timeline works
+-   [ ] Tracking works
+-   [ ] Notifications work
 
-- [ ] Order history works
-- [ ] Order details work
-- [ ] Audit timeline works
-- [ ] Tracking works
-- [ ] Notifications work
+## Failure Handling
 
-### Failure handling
+-   [ ] Missing catalog request works
+-   [ ] Out-of-stock recovery works
+-   [ ] Alternative selection works
+-   [ ] Original budget remains enforced
+-   [ ] Rejection works
 
-- [ ] Out-of-stock recovery works
-- [ ] Alternative selection works
-- [ ] Rejection works
-- [ ] Original budget remains enforced
+## Docker
 
-### Demo hygiene
+-   [ ] `docker compose up --build` works
+-   [ ] Frontend available at `http://localhost`
+-   [ ] Backend available at `http://localhost:8000`
+-   [ ] Swagger available at `http://localhost:8000/docs`
 
-- [ ] No API secrets visible
-- [ ] No `.env` displayed
-- [ ] Test Mode clearly identified
-- [ ] Demo tracking described as simulated
+## Demo Hygiene
+
+-   [ ] No API secrets visible
+-   [ ] No `.env` displayed
+-   [ ] Test Mode clearly identified
+-   [ ] Tracking described as controlled/simulated

@@ -1,3 +1,6 @@
+import { API_BASE_URL } from "../api/client";
+
+
 function ProductDetails({
   product,
   onClose,
@@ -27,7 +30,7 @@ function ProductDetails({
           <div className="product-details-image">
             {product.image_url ? (
               <img
-                src={product.image_url}
+                src={`${API_BASE_URL}${product.image_url}`}
                 alt={product.name}
               />
             ) : (

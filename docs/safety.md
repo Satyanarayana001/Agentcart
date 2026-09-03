@@ -4,27 +4,26 @@
 
 AgentCart is designed around a central principle:
 
-> **AI should assist with commerce without receiving unrestricted authority over money.**
+> **AI should assist with commerce without receiving unrestricted
+> authority over money.**
 
 The system therefore separates:
 
-- AI reasoning
-- Deterministic policy enforcement
-- Human authorization
-- Payment execution
-- Payment verification
-- Fulfillment
-- Auditing
+-   AI reasoning;
+-   deterministic policy enforcement;
+-   human authorization;
+-   payment execution;
+-   payment verification;
+-   fulfillment;
+-   auditing.
 
----
+------------------------------------------------------------------------
 
 # 2. Core Security Boundary
 
-The central AgentCart boundary is:
-
-```text
+``` text
 ┌──────────────────────┐
-│      AI Agent        │
+│       AI Agent       │
 │                      │
 │ Understand request   │
 │ Recommend product    │
@@ -32,7 +31,7 @@ The central AgentCart boundary is:
 └──────────┬───────────┘
            ↓
 ┌──────────────────────┐
-│    Policy Layer      │
+│     Policy Layer     │
 │                      │
 │ Product              │
 │ Stock                │
@@ -42,7 +41,7 @@ The central AgentCart boundary is:
 └──────────┬───────────┘
            ↓
 ┌──────────────────────┐
-│   Human Approval     │
+│    Human Approval    │
 │                      │
 │ Explicit consent     │
 └──────────┬───────────┘
@@ -57,40 +56,42 @@ The central AgentCart boundary is:
 └──────────────────────┘
 ```
 
-This boundary is fundamental to the application design.
+This boundary is fundamental to AgentCart.
 
----
+------------------------------------------------------------------------
 
 # 3. AI Capability Boundary
 
 The AI is allowed to:
 
-- Interpret natural-language requests
-- Identify relevant purchasing constraints
-- Recommend products
-- Help identify alternatives
-- Generate purchase-plan explanations
+-   interpret natural-language requests;
+-   extract purchasing constraints;
+-   identify relevant catalog products;
+-   recommend products;
+-   help identify alternatives;
+-   produce recommendation explanations.
 
 The AI is not granted unrestricted authority to:
 
-- Approve purchases
-- Override budget rules
-- Ignore stock constraints
-- Authorize payment
-- Mark payments as verified
-- Declare fulfillment completed
+-   approve purchases;
+-   override budget rules;
+-   ignore stock constraints;
+-   invent catalog products;
+-   authorize payment;
+-   mark payments as verified;
+-   declare fulfillment completed.
 
 This is an intentional capability boundary.
 
----
+------------------------------------------------------------------------
 
 # 4. Deterministic Backend Controls
 
-The backend remains responsible for enforcing important commerce rules.
+The backend remains responsible for important commerce rules.
 
-Examples include:
+Examples:
 
-```text
+``` text
 Product exists?
 Quantity valid?
 Stock sufficient?
@@ -99,17 +100,41 @@ Plan state valid?
 Payment state valid?
 ```
 
-The model's output therefore enters a controlled validation layer before financial actions occur.
+AI output therefore enters a controlled validation layer before
+financial actions occur.
 
----
+------------------------------------------------------------------------
 
-# 5. Human-in-the-Loop Approval
+# 5. Catalog Integrity
+
+AgentCart does not treat the AI's product selection as sufficient
+evidence that a product exists.
+
+The selected product must correspond to the controlled catalog.
+
+For a category that is not represented, such as:
+
+``` text
+Is there any TV?
+```
+
+the system can return:
+
+``` text
+CATALOG_INQUIRY
+```
+
+instead of forcing an unrelated product selection.
+
+This prevents catalog hallucination from becoming a purchase action.
+
+------------------------------------------------------------------------
+
+# 6. Human-in-the-Loop Approval
 
 The customer must explicitly approve the purchase plan.
 
-The flow is:
-
-```text
+``` text
 AI Recommendation
        ↓
 Purchase Plan
@@ -123,140 +148,135 @@ Payment Allowed
 
 The customer can also reject the plan.
 
-Rejection stops the normal payment progression.
+Rejection stops normal payment progression.
 
----
+------------------------------------------------------------------------
 
-# 6. No Silent Substitution
+# 7. No Silent Substitution
 
-When a requested product is unavailable, AgentCart does not silently select a replacement.
+When a requested product is unavailable:
 
-Instead:
-
-```text
+``` text
 Unavailable
     ↓
 Alternatives
     ↓
-Customer chooses
+Customer Chooses
     ↓
-Backend revalidates
+Backend Revalidates
 ```
 
-This preserves customer intent and avoids unexpected purchases.
+The agent does not silently select a replacement.
 
----
+This preserves customer intent.
 
-# 7. No Silent Budget Increase
+------------------------------------------------------------------------
 
-The customer's maximum budget is treated as a real constraint.
+# 8. No Silent Budget Increase
 
-For example:
+The maximum budget expressed by the customer is treated as a real
+constraint.
 
-```text
+Example:
+
+``` text
 Budget = ₹5000
 Alternative = ₹5799
 ```
 
 The system does not automatically convert:
 
-```text
+``` text
 ₹5000 → ₹5799
 ```
 
-The alternative must satisfy the existing plan constraints.
+The alternative must satisfy the existing policy constraints.
 
----
+------------------------------------------------------------------------
 
-# 8. Payment Security
+# 9. Payment Security
 
 AgentCart currently uses Razorpay Test Mode.
 
-Payment secrets must remain outside the frontend and source repository.
-
 Sensitive credentials include:
 
-```text
+``` text
+RAZORPAY_KEY_ID
 RAZORPAY_KEY_SECRET
 GROQ_API_KEY
 ```
 
-These values must never be:
+Actual secret values must never be:
 
-- Hardcoded into source files
-- Sent to the frontend
-- Included in screenshots
-- Added to README files
-- Committed to Git
-- Shared in public repositories
-
----
-
-# 9. Environment Variables
-
-The backend expects environment configuration such as:
-
-```env
-RAZORPAY_KEY_ID=
-RAZORPAY_KEY_SECRET=
-GROQ_API_KEY=
-```
+-   hardcoded into source files;
+-   sent to the frontend;
+-   committed to Git;
+-   included in README files;
+-   shown in screenshots;
+-   shown in recordings;
+-   published in the repository.
 
 Local secrets belong in:
 
-```text
+``` text
 backend/.env
 ```
 
-The repository's ignore rules are intended to prevent local environment files from being committed.
+and the repository should contain only placeholder configuration such as
+`.env.example`.
 
-`.env.example` contains placeholders rather than actual credentials.
-
----
+------------------------------------------------------------------------
 
 # 10. Payment Verification
 
-A frontend payment response is not treated as sufficient proof of payment.
+A frontend payment response is not treated as sufficient proof of
+payment.
 
-The expected security flow is:
+The intended boundary is:
 
-```text
+``` text
 Razorpay Checkout
        ↓
 Payment identifiers
        ↓
 Backend
        ↓
-Signature / payment verification
+Payment verification
        ↓
 Verified
        ↓
 Purchase completion
 ```
 
-The backend is responsible for deciding whether the payment can be considered verified.
+The principle is:
 
-Only after successful verification should the purchase lifecycle move into the completed state.
+``` text
+Frontend payment success
+          ≠
+Backend verified payment
+```
 
----
+Only successful backend verification should enable purchase completion.
+
+------------------------------------------------------------------------
 
 # 11. Test Mode
 
 The hackathon implementation uses Razorpay Test Mode.
 
-This allows the application to demonstrate:
+This allows the demonstration of:
 
-- Payment-order creation
-- Checkout
-- Payment response
-- Backend verification
-- Purchase completion
+-   payment-order creation;
+-   checkout;
+-   payment response;
+-   backend verification;
+-   purchase completion;
 
-without using real customer money.
+without representing a real-money transaction.
 
-The demo should clearly identify payment as test-mode behavior.
+The demo should clearly identify the payment flow as Test Mode.
 
----
+------------------------------------------------------------------------
 
 # 12. Auditability
 
@@ -264,9 +284,9 @@ Agentic commerce requires visibility into important actions.
 
 AgentCart records significant lifecycle events.
 
-Example:
+Purchase events can include:
 
-```text
+``` text
 PLAN_CREATED
 POLICY_VALIDATED
 PLAN_APPROVED
@@ -275,43 +295,51 @@ PAYMENT_VERIFIED
 PURCHASE_COMPLETED
 ```
 
-Fulfillment events are also recorded.
+Fulfillment events can include:
 
-This creates an inspectable history of the transaction.
+``` text
+FULFILLMENT_PROCESSING
+FULFILLMENT_SHIPPED
+FULFILLMENT_OUT_FOR_DELIVERY
+FULFILLMENT_DELIVERED
+```
 
----
+This creates an inspectable transaction history.
+
+------------------------------------------------------------------------
 
 # 13. Explainability
 
 AgentCart provides a visible:
 
-```text
+``` text
 Why this product?
 ```
 
 section.
 
-This helps the customer understand the relationship between:
+This connects:
 
-```text
-Customer request
+``` text
+Customer Request
        ↓
-Product recommendation
+Recommendation
        ↓
-Purchase plan
+Purchase Plan
 ```
 
-The system therefore does not hide the recommendation behind an opaque checkout step.
+The customer can therefore understand the recommendation before
+authorizing it.
 
----
+------------------------------------------------------------------------
 
 # 14. Order and Fulfillment Boundaries
 
-The application separates payment completion from fulfillment tracking.
+Payment completion and fulfillment tracking are separate concerns.
 
-The tracking lifecycle is:
+The current controlled lifecycle is:
 
-```text
+``` text
 PROCESSING
      ↓
 SHIPPED
@@ -321,17 +349,17 @@ OUT_FOR_DELIVERY
 DELIVERED
 ```
 
-The current fulfillment system is a controlled hackathon demo.
+The fulfillment system is a hackathon demonstration.
 
-It is not represented as a live connection to a real logistics provider.
+It is not represented as a live connection to a logistics provider.
 
----
+------------------------------------------------------------------------
 
 # 15. Demo Identity Boundary
 
-The current application uses a fictional demo customer:
+The application uses a fictional demo customer.
 
-```text
+``` text
 Arjun Mehta
 AC-DEMO-001
 ```
@@ -340,22 +368,23 @@ The login is intentionally lightweight for the hackathon.
 
 It should not be interpreted as:
 
-- Production authentication
-- Identity verification
-- Account recovery
-- Authorization for real users
+-   production authentication;
+-   identity verification;
+-   account recovery;
+-   production authorization.
 
-A production version would require a complete authentication and authorization system.
+A production deployment would require a complete authentication and
+authorization system.
 
----
+------------------------------------------------------------------------
 
 # 16. Notification Integrity
 
 Notifications are generated from backend state transitions.
 
-For example:
+Example:
 
-```text
+``` text
 Tracking changes to SHIPPED
         ↓
 Audit event recorded
@@ -363,9 +392,10 @@ Audit event recorded
 Shipped notification created
 ```
 
-This avoids making the frontend the authoritative source for fulfillment state.
+The frontend is therefore not the authoritative source of fulfillment
+state.
 
----
+------------------------------------------------------------------------
 
 # 17. Data Integrity
 
@@ -373,22 +403,23 @@ Important state is persisted in the backend database.
 
 This includes:
 
-- Purchase plans
-- Payment orders
-- Audit events
-- Fulfillment state
-- Notifications
-- Orders
+-   purchase plans;
+-   payment orders;
+-   orders;
+-   audit events;
+-   fulfillment state;
+-   notifications.
 
-This allows the application to recover important state after a page refresh.
+Persisted backend state allows important transaction information to
+survive a frontend refresh.
 
----
+------------------------------------------------------------------------
 
 # 18. Docker and Secrets
 
 The application is packaged as separate frontend and backend containers.
 
-```text
+``` text
 Frontend
    ↓
 Backend
@@ -398,17 +429,18 @@ External services
 
 Secrets should be injected through environment configuration.
 
-They should not be baked into Docker images or committed to source control.
+They should not be baked into frontend bundles or committed to source
+control.
 
----
+------------------------------------------------------------------------
 
 # 19. Current Security Scope
 
 AgentCart is a hackathon implementation.
 
-The current scope intentionally focuses on demonstrating the core safety architecture:
+The current scope focuses on demonstrating:
 
-```text
+``` text
 AI
  ↓
 Policy
@@ -422,70 +454,72 @@ Audit
 
 It is not intended to represent a complete production security program.
 
----
+------------------------------------------------------------------------
 
 # 20. Production Security Requirements
 
-Before using a system like AgentCart for real customers and real money, additional controls would be required.
+Before using an AgentCart-like system with real customers and real
+money, additional controls would be required.
 
-These include:
+## Authentication
 
-### Authentication
+-   secure login;
+-   session management;
+-   account recovery;
+-   appropriate multi-factor authentication.
 
-- Secure login
-- Session management
-- Account recovery
-- Multi-factor authentication where appropriate
+## Authorization
 
-### Authorization
+-   customer-level data isolation;
+-   role-based access control where appropriate;
+-   server-side authorization checks.
 
-- User-level data isolation
-- Role-based access control
-- Server-side authorization checks
+## Payment
 
-### Payment
+-   production payment configuration;
+-   webhook verification;
+-   idempotency;
+-   replay protection;
+-   robust payment-state reconciliation;
+-   refund and cancellation workflows.
 
-- Production payment configuration
-- Webhook verification
-- Idempotency
-- Replay protection
-- Robust payment-state reconciliation
+## Infrastructure
 
-### Infrastructure
+-   HTTPS;
+-   secure secret manager;
+-   network controls;
+-   rate limiting;
+-   monitoring;
+-   alerting;
+-   secure structured logging.
 
-- HTTPS
-- Secure secret manager
-- Network controls
-- Rate limiting
-- Monitoring
-- Alerting
-- Secure logging
+## Data
 
-### Data
+-   production database;
+-   backups;
+-   encryption controls;
+-   retention policies;
+-   privacy controls.
 
-- Production database
-- Backups
-- Encryption controls
-- Retention policies
-- Privacy controls
+## Commerce
 
-### Commerce
+-   inventory reservation;
+-   concurrency protection;
+-   real fulfillment integration;
+-   operational recovery workflows.
 
-- Inventory reservation
-- Concurrency protection
-- Real fulfillment integration
-- Refund/cancellation workflows
-
----
+------------------------------------------------------------------------
 
 # 21. Security Invariants
 
-The following rules should remain true throughout the application:
+The following rules should remain true:
 
-```text
+``` text
 AI recommendation ≠ authorization
 
 AI output ≠ business-rule validation
+
+Missing catalog category ≠ invented product
 
 Out-of-stock ≠ silent substitution
 
@@ -498,23 +532,38 @@ Demo tracking ≠ real logistics
 Demo login ≠ production authentication
 ```
 
----
+------------------------------------------------------------------------
 
 # 22. Safety Philosophy
 
 AgentCart is built around **bounded agency**.
 
-The goal is not to remove humans from every commerce decision.
+The goal is not:
 
-The goal is to automate the parts where AI provides value while preserving control over high-impact actions.
+``` text
+Give AI complete control.
+```
+
+The goal is:
+
+``` text
+Give AI useful capabilities
+while keeping high-impact actions
+behind deterministic controls
+and human authorization.
+```
 
 In short:
 
-```text
+``` text
 AI may recommend.
+
 Backend must validate.
+
 Human must approve.
+
 Payment must be verified.
+
 Important actions must be auditable.
 ```
 

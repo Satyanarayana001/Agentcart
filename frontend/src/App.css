@@ -4163,3 +4163,196 @@
   }
 
 }
+/* =========================================================
+   AGENTCART BRAND LOGO
+   ========================================================= */
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  flex-shrink: 0;
+}
+
+.brand-logo {
+  width: 40px;
+  height: 40px;
+  display: block;
+  object-fit: contain;
+}
+
+.brand-copy {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.brand-name {
+  font-size: 21px;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.5px;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.brand-subtitle {
+  margin-top: 3px;
+  font-size: 11px;
+  line-height: 1;
+  color: var(--text-muted);
+  letter-spacing: 0.2px;
+}
+/* =========================================================
+   CLEAN COMMERCE HEADER
+   ========================================================= */
+
+.navbar {
+  min-height: 68px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border-light);
+  box-shadow: none;
+}
+
+.navbar-inner {
+  min-height: 68px;
+  padding: 0 var(--page-gutter);
+}
+
+.brand {
+  gap: 10px;
+}
+
+.brand-logo {
+  width: 38px;
+  height: 38px;
+}
+
+.brand-name {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.45px;
+}
+
+.brand-subtitle {
+  font-size: 10px;
+  margin-top: 2px;
+}
+
+/* Navigation actions */
+
+.nav-actions {
+  gap: 10px;
+}
+
+/* Orders */
+
+.nav-orders-button {
+  min-height: 40px;
+  padding: 0 12px;
+  border-radius: 9px;
+  transition:
+    background 0.18s ease,
+    color 0.18s ease;
+}
+
+.nav-orders-button:hover {
+  background: var(--surface-soft);
+}
+
+/* Notifications */
+
+.nav-icon-button {
+  width: 40px;
+  height: 40px;
+  border-radius: 9px;
+  transition:
+    background 0.18s ease,
+    transform 0.18s ease;
+}
+
+.nav-icon-button:hover {
+  background: var(--surface-soft);
+  transform: translateY(-1px);
+}
+
+/* Divider */
+
+.nav-divider {
+  height: 26px;
+  margin: 0 4px;
+  background: var(--border-light);
+}
+
+/* AI status */
+
+.nav-status {
+  padding: 7px 11px;
+  border: 1px solid var(--border-light);
+  border-radius: 10px;
+  background: var(--surface-soft);
+}
+
+.nav-status-copy {
+  gap: 1px;
+}
+
+.nav-status-label {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.nav-status-detail {
+  font-size: 10px;
+}
+
+/* Account */
+
+.nav-account-button {
+  min-height: 42px;
+  padding: 3px 6px 3px 4px;
+  border-radius: 10px;
+  transition:
+    background 0.18s ease;
+}
+
+.nav-account-button:hover {
+  background: var(--surface-soft);
+}
+
+.nav-avatar {
+  width: 34px;
+  height: 34px;
+}
+
+.nav-account-copy strong {
+  font-size: 12px;
+}
+
+.nav-account-copy span {
+  font-size: 10px;
+}
+/* =========================================================
+   HEADER SHOP NAVIGATION
+   ========================================================= */
+
+.nav-shop-button {
+  min-height: 40px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 0.18s ease,
+    color 0.18s ease;
+}
+
+.nav-shop-button:hover {
+  background: var(--surface-soft);
+  color: var(--text);
+}

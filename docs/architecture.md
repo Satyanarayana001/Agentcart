@@ -2,26 +2,30 @@
 
 ## 1. Purpose
 
-AgentCart is an AI-powered agentic commerce application that converts a customer's natural-language shopping request into a validated and explainable purchase plan.
+AgentCart converts a customer's natural-language shopping request into a
+validated and explainable purchase plan while keeping financial
+authorization outside the AI layer.
 
 The architecture deliberately separates:
 
-- AI interpretation and recommendation
-- Deterministic business-policy validation
-- Human authorization
-- Payment processing
-- Payment verification
-- Order management
-- Fulfillment tracking
-- Notifications
-- Audit logging
+-   AI interpretation and recommendation;
+-   deterministic catalog and policy validation;
+-   human authorization;
+-   payment processing;
+-   payment verification;
+-   order management;
+-   fulfillment tracking;
+-   notifications;
+-   audit logging.
 
-The central security and control boundary is:
+The central control boundary is:
 
-```text
+``` text
 AI Decision
      ↓
-Policy Check
+Catalog / Policy Validation
+     ↓
+Purchase Plan
      ↓
 Human Approval
      ↓
@@ -32,13 +36,14 @@ Payment Verification
 Order / Fulfillment
 ```
 
-The AI is therefore an intelligent decision-support component, not an unrestricted financial authority.
+The AI is therefore a decision-support component rather than an
+unrestricted financial authority.
 
----
+------------------------------------------------------------------------
 
 # 2. High-Level Architecture
 
-```text
+``` text
                          ┌─────────────────────┐
                          │      Customer       │
                          └──────────┬──────────┘
@@ -48,29 +53,28 @@ The AI is therefore an intelligent decision-support component, not an unrestrict
                          │   React Frontend    │
                          │      + Vite         │
                          ├─────────────────────┤
-                         │ Demo Login           │
-                         │ Commerce             │
-                         │ Product Discovery    │
-                         │ Purchase Plan        │
-                         │ Approval Gate        │
-                         │ Payment Gate         │
-                         │ Orders               │
-                         │ Order Details        │
-                         │ Tracking             │
-                         │ Notifications        │
+                         │ Demo Login          │
+                         │ Commerce            │
+                         │ Product Discovery   │
+                         │ Purchase Plan       │
+                         │ Approval Gate       │
+                         │ Payment Gate        │
+                         │ Orders              │
+                         │ Tracking            │
+                         │ Notifications       │
                          └──────────┬──────────┘
                                     │ HTTP
                                     ▼
                  ┌─────────────────────────────────────┐
-                 │           FastAPI Backend            │
+                 │           FastAPI Backend             │
                  ├─────────────────────────────────────┤
-                 │ Agent API                            │
-                 │ Catalog API                          │
-                 │ Purchase API                         │
-                 │ Payment API                          │
-                 │ Orders API                           │
-                 │ Tracking API                         │
-                 │ Notifications API                    │
+                 │ Agent API                             │
+                 │ Catalog API                           │
+                 │ Purchase API                          │
+                 │ Payment API                           │
+                 │ Orders API                            │
+                 │ Tracking API                          │
+                 │ Notifications API                     │
                  │ Audit API                             │
                  └───────────────┬─────────────────────┘
                                  │
@@ -83,13 +87,13 @@ The AI is therefore an intelligent decision-support component, not an unrestrict
       └─────────────┘     └─────────────┘     └──────────────┘
 ```
 
----
+------------------------------------------------------------------------
 
 # 3. Frontend Architecture
 
 The frontend is a React/Vite application.
 
-```text
+``` text
 frontend/src/
 │
 ├── api/
@@ -115,11 +119,9 @@ frontend/src/
 └── index.css
 ```
 
-### Application navigation
+The main application areas are:
 
-The application contains three primary page states:
-
-```text
+``` text
 Shop
   ↓
 Orders
@@ -127,15 +129,16 @@ Orders
 Order Details
 ```
 
-The commerce page contains the active purchasing workflow.
+The commerce page contains the active agentic purchasing workflow.
 
----
+------------------------------------------------------------------------
 
 # 4. Backend Architecture
 
-The backend uses FastAPI with a separation between API routes, schemas, database models, and service logic.
+The backend uses FastAPI with separate API, schema, database,
+integration, and service responsibilities.
 
-```text
+``` text
 backend/app/
 │
 ├── api/
@@ -153,7 +156,8 @@ backend/app/
 │   ├── models.py
 │   ├── seed.py
 │   └── data/
-│       └── products.json
+│       ├── products.json
+│       └── images/
 │
 ├── schemas/
 │   ├── notification.py
@@ -168,25 +172,27 @@ backend/app/
     └── tracking_service.py
 ```
 
-The API layer handles HTTP requests and responses.
+The API layer handles HTTP boundaries.
 
 The service layer contains business behavior.
 
 The database layer provides persistence.
 
----
+The Groq adapter isolates the external AI integration.
+
+------------------------------------------------------------------------
 
 # 5. Natural-Language Agent Flow
 
-A customer can submit a request such as:
+A request such as:
 
-```text
+``` text
 Buy wireless ANC headphones under ₹5000
 ```
 
-The flow is:
+moves through:
 
-```text
+``` text
 Customer Request
        ↓
 Agent API
@@ -197,107 +203,140 @@ Structured AI Intent
        ↓
 Agent Service
        ↓
-Catalog / Policy Validation
+Catalog Validation
+       ↓
+Policy Validation
        ↓
 Purchase Plan
 ```
 
-The AI model is used to interpret the request and produce structured information.
+The AI produces structured intent information.
 
-The backend does not blindly trust the model output.
+The backend then validates that information instead of blindly trusting
+it.
 
----
+------------------------------------------------------------------------
 
-# 6. Catalog Layer
+# 6. Catalog Boundary
 
-The product catalog is backed by:
+The catalog is backed by:
 
-```text
+``` text
 backend/app/db/data/products.json
 ```
 
-The current demo catalog contains products with information including:
+The demo catalog contains:
 
-- Product ID
-- Product name
-- Description
-- Price
-- Stock
-- Relevant product attributes
+-   Product ID
+-   Product name
+-   Description
+-   Price
+-   Stock
+-   Product attributes
 
-The catalog layer supports:
+Product images are stored under:
 
-```text
+``` text
+backend/app/db/data/images/
+```
+
+The catalog supports:
+
+``` text
 Get products
 Get product
 Search products
 ```
 
-The catalog is also used when finding alternatives for unavailable products.
+The catalog is also the source used when looking for valid alternatives.
 
----
+------------------------------------------------------------------------
 
-# 7. Alternative Product Selection
+# 7. Catalog Inquiry vs Product Request
 
-When the requested product is unavailable, the agent service searches for suitable available alternatives.
+AgentCart distinguishes a missing catalog category from an unavailable
+catalog item.
 
-The conceptual process is:
+For a request such as:
 
-```text
+``` text
+Is there any TV?
+```
+
+if the requested category is not represented, the system returns:
+
+``` text
+CATALOG_INQUIRY
+```
+
+with no purchase plan.
+
+The frontend can then explain that the requested category is unavailable
+and keep the customer in the catalog experience.
+
+This prevents an unrelated product from being selected merely because
+the AI needs to return a product.
+
+------------------------------------------------------------------------
+
+# 8. Alternative Product Selection
+
+When a genuine requested product exists but is unavailable because its
+stock is zero:
+
+``` text
 Requested Product
        ↓
-Check Stock
+Stock Check
        ↓
 Unavailable
        ↓
 Find Available Catalog Products
        ↓
-Rank Similar Products
-       ↓
-Return Alternatives
+Rank Alternatives
        ↓
 Customer Chooses
        ↓
-Revalidate Selected Product
+Backend Revalidates
 ```
 
-The customer must explicitly choose the alternative.
+The customer explicitly selects the alternative.
 
-The backend preserves the original budget instead of automatically increasing it.
+The original budget remains part of the constraints.
 
----
+------------------------------------------------------------------------
 
-# 8. Purchase Plan Layer
+# 9. Purchase Plan
 
-The purchase plan is the intermediate representation between recommendation and payment.
+The purchase plan is the controlled intermediate state between
+recommendation and payment.
 
 A plan contains information such as:
 
-- Plan ID
-- Maximum budget
-- Currency
-- Status
-- Explanation
-- Product items
-- Quantity
-- Unit price
+-   Plan ID;
+-   maximum budget;
+-   currency;
+-   status;
+-   explanation;
+-   product items;
+-   quantity;
+-   unit price.
 
-The plan creates a controlled boundary before money movement.
+The plan allows the customer to inspect the proposed purchase before
+authorizing it.
 
----
+------------------------------------------------------------------------
 
-# 9. Policy Validation
+# 10. Deterministic Policy Validation
 
-The backend validates the proposed purchase.
+The backend validates:
 
-Conceptually:
-
-```text
+``` text
 Product exists?
        ↓
 Quantity valid?
        ↓
-Enough stock?
+Stock sufficient?
        ↓
 Within budget?
        ↓
@@ -306,15 +345,20 @@ Plan state valid?
 Continue
 ```
 
-This prevents an AI recommendation from bypassing deterministic commerce rules.
+The purpose is to prevent model output from bypassing deterministic
+commerce rules.
 
----
+The AI may propose.
 
-# 10. Human Approval Layer
+The backend determines whether the proposal is valid.
 
-Human approval is an explicit state transition.
+------------------------------------------------------------------------
 
-```text
+# 11. Human Approval
+
+Approval is an explicit state transition:
+
+``` text
 PLAN_CREATED
       ↓
 POLICY_VALIDATED
@@ -322,29 +366,25 @@ POLICY_VALIDATED
 PLAN_APPROVED
 ```
 
-Payment-order creation occurs after approval.
+Payment-order creation is gated behind approval.
 
-This creates a clear separation between:
+This produces a clear boundary:
 
-```text
-AI recommendation
+``` text
+AI Recommendation
+        ≠
+Customer Authorization
 ```
 
-and:
+------------------------------------------------------------------------
 
-```text
-Customer authorization
-```
-
----
-
-# 11. Payment Layer
+# 12. Payment Architecture
 
 The payment API integrates Razorpay Test Mode.
 
-The expected lifecycle is:
+Expected lifecycle:
 
-```text
+``` text
 Approved Plan
       ↓
 Create Razorpay Order
@@ -360,49 +400,49 @@ Payment Verified
 Purchase Completed
 ```
 
-The frontend payment result is not treated as the final source of truth.
+The frontend payment result is not treated as the authoritative
+completion signal.
 
----
+------------------------------------------------------------------------
 
-# 12. Payment Verification Boundary
+# 13. Payment Verification Boundary
 
-The backend verifies payment before completing the purchase.
+The security boundary is:
 
-This is important because:
-
-```text
-Frontend:
-"Payment succeeded"
-```
-
-must not automatically become:
-
-```text
-Backend:
-"Purchase completed"
-```
-
-Instead:
-
-```text
-Payment Response
+``` text
+Checkout Response
+       ↓
+Payment Identifiers
        ↓
 Backend Verification
        ↓
 Verified
        ↓
-Complete Purchase
+Purchase Completion
 ```
 
-Only the verified state should enable the successful purchase lifecycle.
+Conceptually:
 
----
+``` text
+Frontend:
+"Payment succeeded"
 
-# 13. Database Model
+must not automatically become:
 
-The current database contains the following major entities:
+Backend:
+"Purchase completed"
+```
 
-```text
+Only the verified payment state can advance the transaction into
+completion.
+
+------------------------------------------------------------------------
+
+# 14. Database Model
+
+Major entities:
+
+``` text
 Product
 PurchasePlan
 PurchaseItem
@@ -412,54 +452,63 @@ Fulfillment
 Notification
 ```
 
-The primary relationship chain is:
+Relationship model:
 
-```text
+``` text
+Product
+   │
+   ▼
+PurchaseItem
+   │
+   ▼
 PurchasePlan
-      │
-      ├── PurchaseItems
-      │
-      └── PaymentOrder
-              │
-              └── Fulfillment
+   │
+   ├──────────────► AuditEvent
+   │
+   ▼
+PaymentOrder
+   │
+   ▼
+Fulfillment
+   │
+   └──────────────► Notification
 ```
 
-Audit events and notifications reference the relevant plan/order identifiers.
+Important transaction state is persisted in SQLite.
 
----
+------------------------------------------------------------------------
 
-# 14. Order Management
+# 15. Order Management
 
-The order service exposes:
+Order APIs:
 
-```text
+``` text
 GET /api/orders/
 GET /api/orders/{order_id}
 ```
 
-The order history is generated from persisted payment/order records.
+Persisted order information can include:
 
-Order details include:
+-   Order ID;
+-   Plan ID;
+-   amount;
+-   currency;
+-   status;
+-   Razorpay order ID;
+-   Razorpay payment ID;
+-   creation timestamp;
+-   items;
+-   plan explanation;
+-   plan status.
 
-- Order ID
-- Plan ID
-- Amount
-- Currency
-- Status
-- Razorpay order ID
-- Razorpay payment ID
-- Created timestamp
-- Items
-- Plan explanation
-- Plan status
+------------------------------------------------------------------------
 
----
+# 16. Fulfillment Tracking
 
-# 15. Fulfillment Tracking
+After successful payment verification, an order can enter the controlled
+demo fulfillment lifecycle:
 
-After payment verification, an order can enter the demo fulfillment lifecycle.
-
-```text
+``` text
 PROCESSING
      ↓
 SHIPPED
@@ -471,23 +520,24 @@ DELIVERED
 
 The tracking service:
 
-1. Validates order/payment eligibility.
-2. Creates fulfillment state when appropriate.
-3. Advances the fulfillment state.
-4. Records an audit event.
-5. Creates a notification.
+1.  validates order/payment eligibility;
+2.  creates fulfillment state when appropriate;
+3.  advances the fulfillment state;
+4.  records an audit event;
+5.  creates a notification.
 
-The tracking system is intentionally a controlled hackathon demonstration and is not a real courier integration.
+The tracking system is a controlled hackathon demonstration, not a live
+courier integration.
 
----
+------------------------------------------------------------------------
 
-# 16. Notification System
+# 17. Notification System
 
-Notifications are stored in the database.
+Notifications are persisted in the database.
 
-Each notification contains:
+A notification contains information such as:
 
-```text
+``` text
 notification_id
 order_id
 plan_id
@@ -498,39 +548,38 @@ is_read
 created_at
 ```
 
-A tracking transition generates a notification.
+Tracking transitions generate notifications.
 
-For example:
-
-```text
+``` text
 PROCESSING
-     ↓
-"Order is being prepared"
+    ↓
+Order is being prepared
 
 SHIPPED
-     ↓
-"Shipped"
+    ↓
+Shipped
 
 OUT_FOR_DELIVERY
-     ↓
-"Out for delivery"
+    ↓
+Out for delivery
 
 DELIVERED
-     ↓
-"Delivered"
+    ↓
+Delivered
 ```
 
-The frontend periodically retrieves the unread count and can open the notification center to inspect notifications.
+The frontend periodically retrieves the unread count and can open the
+notification center.
 
----
+------------------------------------------------------------------------
 
-# 17. Audit System
+# 18. Audit System
 
-The audit system records important lifecycle events.
+Important transaction events are recorded chronologically.
 
-A successful purchase can generate:
+Purchase lifecycle:
 
-```text
+``` text
 PLAN_CREATED
 POLICY_VALIDATED
 PLAN_APPROVED
@@ -539,31 +588,31 @@ PAYMENT_VERIFIED
 PURCHASE_COMPLETED
 ```
 
-Fulfillment transitions can generate:
+Fulfillment lifecycle:
 
-```text
+``` text
 FULFILLMENT_PROCESSING
 FULFILLMENT_SHIPPED
 FULFILLMENT_OUT_FOR_DELIVERY
 FULFILLMENT_DELIVERED
 ```
 
-The audit timeline is therefore a chronological record of significant state changes.
+The audit system provides an inspectable transaction history.
 
----
+------------------------------------------------------------------------
 
-# 18. API Boundaries
+# 19. API Boundaries
 
 ## Agent API
 
-```text
+``` text
 POST /api/agent/purchase
 POST /api/agent/select-product
 ```
 
 ## Catalog API
 
-```text
+``` text
 GET /api/catalog/products
 GET /api/catalog/products/{product_id}
 GET /api/catalog/search
@@ -571,7 +620,7 @@ GET /api/catalog/search
 
 ## Purchase API
 
-```text
+``` text
 GET  /api/purchase/plans/{plan_id}
 POST /api/purchase/plans/{plan_id}/approve
 POST /api/purchase/plans/{plan_id}/reject
@@ -579,7 +628,7 @@ POST /api/purchase/plans/{plan_id}/reject
 
 ## Payment API
 
-```text
+``` text
 POST /api/payment/plans/{plan_id}/orders
 GET  /api/payment/orders/{payment_order_id}
 POST /api/payment/orders/{payment_order_id}/verify
@@ -587,21 +636,21 @@ POST /api/payment/orders/{payment_order_id}/verify
 
 ## Orders API
 
-```text
+``` text
 GET /api/orders/
 GET /api/orders/{order_id}
 ```
 
 ## Tracking API
 
-```text
+``` text
 GET  /api/orders/{order_id}/tracking
 POST /api/orders/{order_id}/tracking/advance
 ```
 
 ## Notifications API
 
-```text
+``` text
 GET  /api/notifications/
 GET  /api/notifications/unread-count
 POST /api/notifications/{notification_id}/read
@@ -610,16 +659,16 @@ POST /api/notifications/read-all
 
 ## Audit API
 
-```text
+``` text
 GET /api/audit/
 GET /api/audit/plans/{plan_id}
 ```
 
----
+------------------------------------------------------------------------
 
-# 19. End-to-End Data Flow
+# 20. End-to-End Data Flow
 
-```text
+``` text
 Customer
    │
    │ Natural-language request
@@ -627,7 +676,10 @@ Customer
 Agent API
    │
    ▼
-Groq AI
+Groq Adapter
+   │
+   ▼
+Structured Intent
    │
    ▼
 Agent Service
@@ -635,44 +687,42 @@ Agent Service
    ├──────────────► Catalog
    │
    └──────────────► Policy Validation
-                       │
-                       ▼
-                 Purchase Plan
-                       │
-                       ▼
-                Human Approval
-                       │
-                       ▼
-                 Payment API
-                       │
-                       ▼
-                   Razorpay
-                       │
-                       ▼
-              Backend Verification
-                       │
-                       ▼
-                 Purchase Complete
-                       │
-             ┌─────────┴─────────┐
-             ▼                   ▼
-           Orders              Audit
-             │
-             ▼
-         Fulfillment
-             │
-       ┌─────┴─────┐
-       ▼           ▼
-    Tracking   Notifications
+                         │
+                         ▼
+                   Purchase Plan
+                         │
+                         ▼
+                  Human Approval
+                         │
+                         ▼
+                    Payment API
+                         │
+                         ▼
+                     Razorpay
+                         │
+                         ▼
+                Backend Verification
+                         │
+                         ▼
+                  Purchase Complete
+                         │
+                  ┌──────┴──────┐
+                  ▼             ▼
+                Orders        Audit
+                  │
+                  ▼
+              Fulfillment
+                  │
+             ┌────┴────┐
+             ▼         ▼
+          Tracking  Notifications
 ```
 
----
+------------------------------------------------------------------------
 
-# 20. Docker Architecture
+# 21. Docker Architecture
 
-AgentCart is packaged as two Docker services.
-
-```text
+``` text
 docker compose
       │
       ├── agentcart-frontend
@@ -684,15 +734,15 @@ docker compose
                   └── Uvicorn
 ```
 
-The frontend is built in a Node.js build stage and served using Nginx.
+The frontend is built using Node/Vite and served by Nginx.
 
 The backend runs independently as a Python service.
 
----
+The SQLite database is persisted through the configured host mapping.
 
-# 21. Architectural Invariants
+------------------------------------------------------------------------
 
-The following rules are fundamental to AgentCart:
+# 22. Architectural Invariants
 
 ### Invariant 1
 
@@ -700,50 +750,57 @@ AI recommendation does not equal purchase authorization.
 
 ### Invariant 2
 
-Business rules are enforced by the backend.
+AI output does not replace deterministic backend validation.
 
 ### Invariant 3
 
-Out-of-stock products are not silently substituted.
+A missing catalog category does not result in an unrelated product
+selection.
 
 ### Invariant 4
 
-Customer budget is not silently increased.
+Out-of-stock products are not silently substituted.
 
 ### Invariant 5
 
-Payment is gated behind human approval.
+Customer budget is not silently increased.
 
 ### Invariant 6
 
-Payment must be verified before purchase completion.
+Payment is gated behind human approval.
 
 ### Invariant 7
 
-Important lifecycle transitions are auditable.
+Payment must be verified before purchase completion.
 
 ### Invariant 8
 
+Important lifecycle transitions are auditable.
+
+### Invariant 9
+
 Fulfillment notifications originate from backend state transitions.
 
----
+------------------------------------------------------------------------
 
-# 22. Design Philosophy
+# 23. Design Philosophy
 
 AgentCart is intentionally designed around **bounded agency**.
 
 The goal is not:
 
-```text
+``` text
 Give AI complete control.
 ```
 
 The goal is:
 
-```text
+``` text
 Give AI useful capabilities
 while keeping high-impact actions
-behind deterministic controls and human authorization.
+behind deterministic controls
+and human authorization.
 ```
 
-This architecture allows AgentCart to demonstrate an agentic-commerce experience without treating the AI model itself as a trusted financial authority.
+This allows the system to demonstrate agentic commerce without treating
+the AI model itself as a trusted financial authority.

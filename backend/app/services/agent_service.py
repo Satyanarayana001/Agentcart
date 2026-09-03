@@ -1,4 +1,5 @@
 import json
+import re
 
 from app.integrations.groq_adapter import groq_adapter
 from app.schemas.agent import (
@@ -30,9 +31,24 @@ class AgentService:
                 "No products available in the catalog."
             )
 
-        # -----------------------------------------------------
-        # Prepare catalog context for AI
-        # -----------------------------------------------------
+        # ---------------------------------------------------------
+        # 1. BACKEND CATALOG CHECK
+        #
+        # Explicit product/category inquiries are checked against
+        # the real catalog BEFORE asking the LLM to select anything.
+        # ---------------------------------------------------------
+
+        catalog_inquiry = self._check_catalog_inquiry(
+            user_request=request.request,
+            products=products,
+        )
+
+        if catalog_inquiry is not None:
+            return catalog_inquiry
+
+        # ---------------------------------------------------------
+        # 2. PREPARE CATALOG CONTEXT FOR AI
+        # ---------------------------------------------------------
 
         available_products = []
 
@@ -47,16 +63,14 @@ class AgentService:
                 }
             )
 
-        # -----------------------------------------------------
-        # AI INTERPRETATION
-        # -----------------------------------------------------
+        # ---------------------------------------------------------
+        # 3. AI INTERPRETATION
+        # ---------------------------------------------------------
 
         try:
-            ai_response = (
-                groq_adapter.analyze_purchase_request(
-                    user_request=request.request,
-                    products=available_products,
-                )
+            ai_response = groq_adapter.analyze_purchase_request(
+                user_request=request.request,
+                products=available_products,
             )
 
             decision = json.loads(ai_response)
@@ -66,19 +80,46 @@ class AgentService:
                 f"AI agent failed to process request: {error}"
             )
 
+        # ---------------------------------------------------------
+        # 4. AI CATALOG INQUIRY
+        # ---------------------------------------------------------
+
         product_id = decision.get("product_id")
-        quantity = decision.get("quantity", 1)
-        max_budget = decision.get("max_budget")
-        reason = decision.get("reason")
+
+        if (
+            product_id is None
+            and decision.get("intent") == "CATALOG_INQUIRY"
+        ):
+            reason = decision.get("reason")
+
+            explanation = (
+                reason
+                or "That product is not currently available "
+                   "in the AgentCart catalog."
+            )
+
+            explanation = (
+                f"{explanation} "
+                "If you'd like anything else, you can choose "
+                "from the products available below."
+            )
+
+            return AgentPurchaseResponse(
+                plan_id=None,
+                status="CATALOG_INQUIRY",
+                explanation=explanation,
+                selected_product=None,
+                alternatives=[],
+            )
+
+        # ---------------------------------------------------------
+        # 5. AI MUST RETURN A PRODUCT ID
+        # ---------------------------------------------------------
 
         if not product_id:
             raise ValueError(
                 "AI agent did not return a product ID."
             )
-
-        # -----------------------------------------------------
-        # Validate selected product
-        # -----------------------------------------------------
 
         selected_product = next(
             (
@@ -94,37 +135,61 @@ class AgentService:
                 "AI agent selected an invalid product."
             )
 
-        # -----------------------------------------------------
-        # Validate quantity
-        # -----------------------------------------------------
+        # ---------------------------------------------------------
+        # 6. SECOND BACKEND SAFETY CHECK
+        #
+        # Even if Groq ignores the prompt and selects an unrelated
+        # product, the backend validates the selection.
+        # ---------------------------------------------------------
+
+        if not self._request_matches_selected_product(
+            user_request=request.request,
+            selected_product=selected_product,
+        ):
+            return AgentPurchaseResponse(
+                plan_id=None,
+                status="CATALOG_INQUIRY",
+                explanation=(
+                    "The product you're looking for is not "
+                    "currently available in the AgentCart catalog. "
+                    "If you'd like anything else, you can choose "
+                    "from the products available below."
+                ),
+                selected_product=None,
+                alternatives=[],
+            )
+
+        # ---------------------------------------------------------
+        # 7. EXISTING PURCHASE FLOW
+        # ---------------------------------------------------------
+
+        quantity = decision.get("quantity", 1)
+        max_budget = decision.get("max_budget")
+        reason = decision.get("reason")
 
         if not isinstance(quantity, int) or quantity <= 0:
             raise ValueError(
                 "AI agent returned an invalid quantity."
             )
 
-        if selected_product.stock > 0 and quantity > selected_product.stock:
-             raise ValueError(
-        "Requested quantity exceeds available stock."
-    )
+        if (
+            selected_product.stock > 0
+            and quantity > selected_product.stock
+        ):
+            raise ValueError(
+                "Requested quantity exceeds available stock."
+            )
 
         if quantity > 10:
             raise ValueError(
-        "Requested quantity exceeds the maximum allowed quantity."
-    )
-
-        # -----------------------------------------------------
-        # Validate budget
-        # -----------------------------------------------------
+                "Requested quantity exceeds the maximum allowed quantity."
+            )
 
         if max_budget is None:
-            max_budget = (
-                selected_product.price * quantity
-            )
+            max_budget = selected_product.price * quantity
 
         try:
             max_budget = float(max_budget)
-
         except (TypeError, ValueError):
             raise ValueError(
                 "AI agent returned an invalid budget."
@@ -135,15 +200,11 @@ class AgentService:
                 "AI agent returned an invalid budget."
             )
 
-        # -----------------------------------------------------
-        # AVAILABILITY CHECK
-        #
-        # AI identifies the requested product.
-        # Backend decides whether it is available.
-        # -----------------------------------------------------
+        # ---------------------------------------------------------
+        # 8. OUT-OF-STOCK PRODUCT
+        # ---------------------------------------------------------
 
         if selected_product.stock < quantity:
-
             alternatives = self._find_alternatives(
                 selected_product=selected_product,
                 products=products,
@@ -165,15 +226,13 @@ class AgentService:
                     stock=selected_product.stock,
                     quantity=quantity,
                     max_budget=max_budget,
-
                 ),
                 alternatives=alternatives,
             )
 
-        # -----------------------------------------------------
-        # PRODUCT AVAILABLE
-        # Create normal purchase plan.
-        # -----------------------------------------------------
+        # ---------------------------------------------------------
+        # 9. CREATE PURCHASE PLAN
+        # ---------------------------------------------------------
 
         return self._create_purchase_plan(
             product=selected_product,
@@ -182,13 +241,367 @@ class AgentService:
             explanation=(
                 reason
                 or f"Selected '{selected_product.name}' "
-                "based on the user's request."
+                   "based on the user's request."
             ),
         )
 
-    # =========================================================
-    # CREATE PLAN FROM USER-SELECTED PRODUCT
-    # =========================================================
+    # =============================================================
+    # BACKEND CATALOG INQUIRY CHECK
+    # =============================================================
+
+    def _check_catalog_inquiry(
+        self,
+        user_request: str,
+        products,
+    ) -> AgentPurchaseResponse | None:
+
+        request_text = user_request.lower().strip()
+
+        # Words that indicate the user is asking about availability
+        # rather than directly purchasing something.
+        inquiry_patterns = [
+            r"\bis there\b",
+            r"\bdo you have\b",
+            r"\bdoes agentcart have\b",
+            r"\bavailable\b",
+            r"\bavailability\b",
+            r"\bcan i get\b",
+            r"\bcan you provide\b",
+        ]
+
+        is_inquiry = any(
+            re.search(pattern, request_text)
+            for pattern in inquiry_patterns
+        )
+
+        if not is_inquiry:
+            return None
+
+        # ---------------------------------------------------------
+        # Build actual catalog vocabulary.
+        # ---------------------------------------------------------
+
+        catalog_categories = {
+            product.category.lower()
+            for product in products
+            if product.category
+        }
+
+        catalog_names = [
+            product.name.lower()
+            for product in products
+        ]
+
+        # ---------------------------------------------------------
+        # Known category aliases.
+        #
+        # These map natural user terminology to catalog categories.
+        # ---------------------------------------------------------
+
+        aliases = {
+            "tv": {"tv", "television", "smart tv"},
+            "television": {"tv", "television", "smart tv"},
+            "headphone": {
+                "headphone",
+                "headphones",
+                "headset",
+                "earphone",
+                "earphones",
+            },
+            "headphones": {
+                "headphone",
+                "headphones",
+                "headset",
+                "earphone",
+                "earphones",
+            },
+            "earbuds": {
+                "earbud",
+                "earbuds",
+                "earphone",
+                "earphones",
+            },
+            "laptop": {
+                "laptop",
+                "notebook",
+            },
+            "phone": {
+                "phone",
+                "smartphone",
+                "mobile",
+            },
+            "smartphone": {
+                "phone",
+                "smartphone",
+                "mobile",
+            },
+            "tablet": {
+                "tablet",
+                "ipad",
+            },
+            "speaker": {
+                "speaker",
+                "speakers",
+            },
+            "camera": {
+                "camera",
+                "cameras",
+            },
+            "watch": {
+                "watch",
+                "smartwatch",
+            },
+            "keyboard": {
+                "keyboard",
+                "keyboards",
+            },
+            "mouse": {
+                "mouse",
+                "mice",
+            },
+            "monitor": {
+                "monitor",
+                "monitors",
+                "display",
+            },
+        }
+
+        # ---------------------------------------------------------
+        # Find explicitly requested product/category terms.
+        # ---------------------------------------------------------
+
+        requested_terms = set()
+
+        for alias_group in aliases.values():
+            for term in alias_group:
+                if re.search(
+                    rf"\b{re.escape(term)}\b",
+                    request_text,
+                ):
+                    requested_terms.add(term)
+
+        # ---------------------------------------------------------
+        # Check actual catalog categories.
+        # ---------------------------------------------------------
+
+        for term in requested_terms:
+
+            # Direct category match.
+            if term in catalog_categories:
+                return None
+
+            # Alias → category match.
+            for category, category_aliases in aliases.items():
+                if term in category_aliases:
+                    if category in catalog_categories:
+                        return None
+
+        # ---------------------------------------------------------
+        # Check exact catalog product names.
+        # ---------------------------------------------------------
+
+        for product_name in catalog_names:
+            if product_name in request_text:
+                return None
+
+        # ---------------------------------------------------------
+        # If an explicit product/category was requested but no
+        # matching catalog entry exists, stop BEFORE Groq.
+        # ---------------------------------------------------------
+
+        if requested_terms:
+
+            requested_display = next(
+                iter(requested_terms)
+            )
+
+            return AgentPurchaseResponse(
+                plan_id=None,
+                status="CATALOG_INQUIRY",
+                explanation=(
+                    f"'{requested_display}' is not currently "
+                    "available in the AgentCart catalog. "
+                    "If you'd like anything else, you can choose "
+                    "from the products available below."
+                ),
+                selected_product=None,
+                alternatives=[],
+            )
+
+        return None
+
+    # =============================================================
+    # BACKEND PRODUCT MATCH VALIDATION
+    # =============================================================
+
+    def _request_matches_selected_product(
+        self,
+        user_request: str,
+        selected_product,
+    ) -> bool:
+
+        request_text = user_request.lower()
+
+        product_text = " ".join(
+            [
+                selected_product.name,
+                selected_product.description,
+                selected_product.category,
+            ]
+        ).lower()
+
+        # Explicit category aliases.
+        aliases = {
+            "tv": {
+                "tv",
+                "television",
+                "smart tv",
+            },
+            "headphones": {
+                "headphone",
+                "headphones",
+                "headset",
+                "earphone",
+                "earphones",
+            },
+            "earbuds": {
+                "earbud",
+                "earbuds",
+                "earphone",
+                "earphones",
+            },
+            "laptop": {
+                "laptop",
+                "notebook",
+            },
+            "phone": {
+                "phone",
+                "smartphone",
+                "mobile",
+            },
+            "tablet": {
+                "tablet",
+                "ipad",
+            },
+            "speaker": {
+                "speaker",
+                "speakers",
+            },
+            "camera": {
+                "camera",
+                "cameras",
+            },
+        }
+
+        # If an explicit category appears in the request,
+        # selected product must belong to that category.
+        for category, terms in aliases.items():
+
+            if any(
+                re.search(
+                    rf"\b{re.escape(term)}\b",
+                    request_text,
+                )
+                for term in terms
+            ):
+
+                if category == "headphones":
+                    return (
+                        selected_product.category.lower()
+                        == "headphones"
+                    )
+
+                if category == "earbuds":
+                    return (
+                        selected_product.category.lower()
+                        == "headphones"
+                        and any(
+                            term in product_text
+                            for term in terms
+                        )
+                    )
+
+                return (
+                    category
+                    in product_text
+                )
+
+        # Generic overlap for natural requests.
+        stop_words = {
+            "i",
+            "want",
+            "need",
+            "buy",
+            "get",
+            "please",
+            "something",
+            "anything",
+            "to",
+            "the",
+            "a",
+            "an",
+            "for",
+            "under",
+            "below",
+            "less",
+            "than",
+            "with",
+            "and",
+            "or",
+            "is",
+            "there",
+            "any",
+            "do",
+            "you",
+            "have",
+            "available",
+            "currently",
+            "can",
+            "me",
+            "my",
+            "in",
+            "on",
+            "at",
+            "around",
+            "approximately",
+        }
+
+        request_words = {
+            word
+            for word in re.findall(
+                r"[a-z0-9]+",
+                request_text,
+            )
+            if word not in stop_words
+            and len(word) >= 3
+            and not word.isdigit()
+        }
+
+        if not request_words:
+            return True
+
+        product_words = set(
+            re.findall(
+                r"[a-z0-9]+",
+                product_text,
+            )
+        )
+
+        if request_words.intersection(product_words):
+            return True
+
+        # Semantic shopping intent.
+        if "music" in request_words or "listen" in request_words:
+            return selected_product.category.lower() in {
+                "headphones",
+                "speaker",
+            }
+
+        return False
+
+    # =============================================================
+    # CREATE PLAN FROM EXPLICIT PRODUCT SELECTION
+    # =============================================================
 
     def create_plan_from_product(
         self,
@@ -204,10 +617,6 @@ class AgentService:
                 "Selected product was not found."
             )
 
-        # Check stock again.
-        #
-        # This is important because the product could have
-        # become unavailable after the alternatives were shown.
         if product.stock < request.quantity:
             raise ValueError(
                 "Selected product is no longer available."
@@ -223,9 +632,9 @@ class AgentService:
             ),
         )
 
-    # =========================================================
-    # PURCHASE PLAN CREATION
-    # =========================================================
+    # =============================================================
+    # PURCHASE PLAN
+    # =============================================================
 
     def _create_purchase_plan(
         self,
@@ -256,9 +665,9 @@ class AgentService:
             explanation=explanation,
         )
 
-    # =========================================================
-    # FIND AVAILABLE ALTERNATIVES
-    # =========================================================
+    # =============================================================
+    # ALTERNATIVES
+    # =============================================================
 
     def _find_alternatives(
         self,
@@ -271,24 +680,20 @@ class AgentService:
 
         for product in products:
 
-            # Never recommend the unavailable product itself.
             if product.id == selected_product.id:
                 continue
 
-            # Alternative must have enough stock.
             if product.stock < quantity:
                 continue
 
             score = 0
 
-            # Same category is the strongest signal.
             if (
                 product.category.lower()
                 == selected_product.category.lower()
             ):
                 score += 5
 
-            # Similar price.
             price_difference = abs(
                 product.price
                 - selected_product.price
@@ -296,25 +701,17 @@ class AgentService:
 
             if price_difference <= 1000:
                 score += 3
-
             elif price_difference <= 2000:
                 score += 1
 
-            # Match product features.
             for key, value in selected_product.features.items():
-
                 if product.features.get(key) == value:
                     score += 1
 
             candidates.append(
-                (
-                    score,
-                    product,
-                )
+                (score, product)
             )
 
-        # Highest score first.
-        # Lower price breaks ties.
         candidates.sort(
             key=lambda item: (
                 -item[0],

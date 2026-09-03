@@ -1,3 +1,6 @@
+import { API_BASE_URL } from "../api/client";
+
+
 function ProductCard({ product, onSelect }) {
   const isAvailable = product.stock > 0;
 
@@ -10,7 +13,7 @@ function ProductCard({ product, onSelect }) {
       <div className="product-card-image">
         {product.image_url ? (
           <img
-            src={product.image_url}
+            src={`${API_BASE_URL}${product.image_url}`}
             alt={product.name}
           />
         ) : (
