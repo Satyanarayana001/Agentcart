@@ -7,7 +7,7 @@ AgentCart treats failure as a normal part of agentic commerce.
 The system should not turn uncertainty or an invalid state into an
 unintended purchase.
 
-The general recovery principle is:
+The recovery principle is:
 
 ``` text
 Detect
@@ -21,35 +21,36 @@ Offer a valid recovery path
 Require customer action where necessary
 ```
 
-The safest default is:
-
 > **If a required validation fails, do not silently continue.**
+
+![AgentCart Failure
+Handling](assets/failure-handling-catalog-inquiry.png)
 
 ------------------------------------------------------------------------
 
-# 2. Failure Categories
+## 2. Failure Categories
 
 AgentCart handles or demonstrates boundaries for:
 
--   catalog/category absence;
--   out-of-stock products;
--   invalid products;
--   invalid quantities;
--   budget violations;
--   customer rejection;
--   payment failures;
--   payment verification failures;
--   invalid orders;
--   invalid tracking transitions;
--   API errors;
--   AI response validation;
--   refresh/persistence scenarios.
+-   Catalog/category absence
+-   Out-of-stock products
+-   Invalid products
+-   Invalid quantities
+-   Budget violations
+-   Customer rejection
+-   Payment failures
+-   Payment verification failures
+-   Invalid orders
+-   Invalid tracking transitions
+-   API errors
+-   AI response validation
+-   Refresh/persistence scenarios
 
 ------------------------------------------------------------------------
 
-# 3. Missing Catalog Category
+## 3. Missing Catalog Category
 
-## Scenario
+### Scenario
 
 The customer asks:
 
@@ -59,7 +60,7 @@ Is there any TV?
 
 when TV is not represented in the current catalog.
 
-## Expected Behavior
+### Expected Behavior
 
 ``` text
 Customer Request
@@ -75,19 +76,19 @@ Keep Customer in Catalog
 
 The system must not:
 
--   invent a TV;
--   select an unrelated product;
--   create a purchase plan;
--   show an approval gate;
--   initiate payment.
+-   Invent a TV
+-   Select an unrelated product
+-   Create a purchase plan
+-   Show an approval gate
+-   Initiate payment
 
 The customer can choose an actually available catalog product instead.
 
 ------------------------------------------------------------------------
 
-# 4. Out-of-Stock Product
+## 4. Out-of-Stock Product
 
-## Scenario
+### Scenario
 
 A genuine requested product exists in the catalog but:
 
@@ -95,7 +96,7 @@ A genuine requested product exists in the catalog but:
 Stock = 0
 ```
 
-## Expected Behavior
+### Expected Behavior
 
 ``` text
 Requested Product
@@ -117,16 +118,15 @@ The customer is never silently moved to another product.
 
 ------------------------------------------------------------------------
 
-# 5. Alternative Selection
+## 5. Alternative Selection
 
-The alternative-product flow searches the available catalog.
+The alternative-product flow considers available catalog products using
+factors such as:
 
-Alternatives may be considered using:
-
--   same category;
--   similar price;
--   matching features;
--   availability.
+-   Same category
+-   Similar price
+-   Matching features
+-   Availability
 
 The customer explicitly chooses the replacement.
 
@@ -134,7 +134,7 @@ The backend then revalidates the selected product.
 
 ------------------------------------------------------------------------
 
-# 6. Budget Preservation
+## 6. Budget Preservation
 
 The original customer budget remains authoritative.
 
@@ -159,7 +159,7 @@ that plan.
 
 ------------------------------------------------------------------------
 
-# 7. Invalid Product
+## 7. Invalid Product
 
 If a product identifier does not correspond to a valid catalog product,
 the backend rejects the request.
@@ -169,7 +169,7 @@ nonexistent product.
 
 ------------------------------------------------------------------------
 
-# 8. Invalid Quantity
+## 8. Invalid Quantity
 
 The backend validates quantity before purchase progression.
 
@@ -190,7 +190,7 @@ proceed.
 
 ------------------------------------------------------------------------
 
-# 9. Budget Violation
+## 9. Budget Violation
 
 If:
 
@@ -202,15 +202,15 @@ the plan cannot pass policy validation.
 
 The system must not:
 
--   increase the budget automatically;
--   hide the violation;
--   continue directly to payment.
+-   Increase the budget automatically
+-   Hide the violation
+-   Continue directly to payment
 
 The customer must change the request or choose a valid product.
 
 ------------------------------------------------------------------------
 
-# 10. Customer Rejection
+## 10. Customer Rejection
 
 Human rejection is an intentional stop condition.
 
@@ -229,11 +229,11 @@ The AI cannot override the customer's decision.
 
 ------------------------------------------------------------------------
 
-# 11. Payment Failure
+## 11. Payment Failure
 
 A payment attempt may fail.
 
-The system must distinguish:
+The system distinguishes:
 
 ``` text
 Payment Failed
@@ -250,7 +250,7 @@ checkout was opened.
 
 ------------------------------------------------------------------------
 
-# 12. Payment Verification Failure
+## 12. Payment Verification Failure
 
 The backend performs payment verification before treating the
 transaction as completed.
@@ -269,12 +269,10 @@ An unverified payment must not be treated as successful fulfillment.
 
 ------------------------------------------------------------------------
 
-# 13. Invalid Order
+## 13. Invalid Order
 
 When an unknown order ID is requested, the backend should return a
 not-found response rather than fabricated order information.
-
-Expected behavior:
 
 ``` text
 Unknown Order ID
@@ -286,7 +284,7 @@ Frontend Error State
 
 ------------------------------------------------------------------------
 
-# 14. Tracking Eligibility Failure
+## 14. Tracking Eligibility Failure
 
 Tracking depends on the order being eligible for fulfillment.
 
@@ -298,32 +296,32 @@ fulfillment.
 
 ------------------------------------------------------------------------
 
-# 15. Invalid Tracking Transition
+## 15. Invalid Tracking Transition
 
 Tracking follows a fixed lifecycle:
 
 ``` text
 PROCESSING
-     ↓
+    ↓
 SHIPPED
-     ↓
+    ↓
 OUT_FOR_DELIVERY
-     ↓
+    ↓
 DELIVERED
 ```
 
 The system should not:
 
--   skip arbitrary states;
--   move backwards without an explicit supported operation;
--   advance beyond `DELIVERED`.
+-   Skip arbitrary states
+-   Move backwards without an explicit supported operation
+-   Advance beyond `DELIVERED`
 
 An invalid transition should return an error instead of corrupting the
 lifecycle.
 
 ------------------------------------------------------------------------
 
-# 16. Notification Integrity
+## 16. Notification Integrity
 
 Notifications originate from backend state transitions.
 
@@ -341,20 +339,18 @@ This keeps notifications connected to actual fulfillment state.
 
 ------------------------------------------------------------------------
 
-# 17. AI Response Failure
+## 17. AI Response Failure
 
 The AI model is not treated as a trusted business-rule engine.
 
 If an AI response is:
 
--   invalid;
--   malformed;
--   missing required information;
--   inconsistent with the catalog;
+-   Invalid
+-   Malformed
+-   Missing required information
+-   Inconsistent with the catalog
 
 the backend validation boundary should prevent unsafe progression.
-
-The principle is:
 
 ``` text
 AI proposes
@@ -366,7 +362,7 @@ Only valid state continues
 
 ------------------------------------------------------------------------
 
-# 18. API Failure
+## 18. API Failure
 
 Frontend API requests are handled through a common request layer.
 
@@ -377,35 +373,32 @@ Examples:
 
 ``` text
 Unable to load order details.
-
 Unable to load tracking.
-
 Unable to update tracking.
-
 Unable to process your request.
 ```
 
 ------------------------------------------------------------------------
 
-# 19. Refresh and Persistence
+## 19. Refresh and Persistence
 
 Important transaction state is persisted in the backend database.
 
 After refreshing the application, the system can reload important state
 such as:
 
--   orders;
--   payment information;
--   audit events;
--   tracking state;
--   notifications.
+-   Orders
+-   Payment information
+-   Audit events
+-   Tracking state
+-   Notifications
 
 This prevents temporary React state from becoming the only source of
 transaction truth.
 
 ------------------------------------------------------------------------
 
-# 20. Failure Matrix
+## 20. Failure Matrix
 
   Scenario                      Expected Behavior
   ----------------------------- ---------------------------------------
@@ -427,7 +420,7 @@ transaction truth.
 
 ------------------------------------------------------------------------
 
-# 21. Failure-Handling Principle
+## 21. Failure-Handling Principle
 
 The most important AgentCart rule is:
 

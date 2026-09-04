@@ -6,19 +6,19 @@ AgentCart converts a customer's natural-language shopping request into a
 validated and explainable purchase plan while keeping financial
 authorization outside the AI layer.
 
-The architecture deliberately separates:
+The architecture separates:
 
--   AI interpretation and recommendation;
--   deterministic catalog and policy validation;
--   human authorization;
--   payment processing;
--   payment verification;
--   order management;
--   fulfillment tracking;
--   notifications;
--   audit logging.
+-   AI interpretation and recommendation
+-   Deterministic catalog and policy validation
+-   Human authorization
+-   Payment processing
+-   Payment verification
+-   Order management
+-   Fulfillment tracking
+-   Notifications
+-   Audit logging
 
-The central control boundary is:
+### Central Control Boundary
 
 ``` text
 AI Decision
@@ -36,69 +36,77 @@ Payment Verification
 Order / Fulfillment
 ```
 
-The AI is therefore a decision-support component rather than an
-unrestricted financial authority.
+The AI is a decision-support component rather than an unrestricted
+financial authority.
 
 ------------------------------------------------------------------------
 
-# 2. High-Level Architecture
+## 2. System Architecture
+
+![AgentCart System Architecture](assets/system-architecture.png)
+
+At a high level:
 
 ``` text
-                         ┌─────────────────────┐
-                         │      Customer       │
-                         └──────────┬──────────┘
-                                    │
-                                    ▼
-                         ┌─────────────────────┐
-                         │   React Frontend    │
-                         │      + Vite         │
-                         ├─────────────────────┤
-                         │ Demo Login          │
-                         │ Commerce            │
-                         │ Product Discovery   │
-                         │ Purchase Plan       │
-                         │ Approval Gate       │
-                         │ Payment Gate        │
-                         │ Orders              │
-                         │ Tracking            │
-                         │ Notifications       │
-                         └──────────┬──────────┘
-                                    │ HTTP
-                                    ▼
-                 ┌─────────────────────────────────────┐
-                 │           FastAPI Backend             │
-                 ├─────────────────────────────────────┤
-                 │ Agent API                             │
-                 │ Catalog API                           │
-                 │ Purchase API                          │
-                 │ Payment API                           │
-                 │ Orders API                            │
-                 │ Tracking API                          │
-                 │ Notifications API                     │
-                 │ Audit API                             │
-                 └───────────────┬─────────────────────┘
-                                 │
-             ┌───────────────────┼────────────────────┐
-             │                   │                    │
-             ▼                   ▼                    ▼
-      ┌─────────────┐     ┌─────────────┐     ┌──────────────┐
-      │   SQLite    │     │    Groq     │     │  Razorpay    │
-      │  Database   │     │     AI      │     │  Test Mode   │
-      └─────────────┘     └─────────────┘     └──────────────┘
+                     CUSTOMER
+                        │
+                        ▼
+               ┌─────────────────┐
+               │ React Frontend  │
+               │     + Vite      │
+               └────────┬────────┘
+                        │ HTTP
+                        ▼
+               ┌─────────────────┐
+               │ FastAPI Backend │
+               └────────┬────────┘
+                        │
+           ┌────────────┼────────────┐
+           ▼            ▼            ▼
+        SQLite         Groq       Razorpay
+       Database         AI        Test Mode
 ```
 
 ------------------------------------------------------------------------
 
-# 3. Frontend Architecture
+## 3. Deployment Architecture
+
+The deployed application uses separate hosted frontend and backend
+services.
+
+``` text
+Browser
+   │
+   ▼
+Render Static Site
+   │
+   │ HTTPS API requests
+   ▼
+Render Web Service
+   │
+   ├── FastAPI
+   ├── Groq integration
+   ├── SQLite persistence
+   └── Razorpay Test Mode
+```
+
+### Live Services
+
+-   Frontend: https://agentcart-trpi.onrender.com/
+-   Backend: https://agentcart-backend-amxc.onrender.com/
+
+The local development architecture remains Docker-based.
+
+------------------------------------------------------------------------
+
+## 4. Frontend Architecture
 
 The frontend is a React/Vite application.
 
 ``` text
 frontend/src/
-│
 ├── api/
 │   └── client.js
-│
 ├── components/
 │   ├── AlternativeProducts.jsx
 │   ├── ApprovalGate.jsx
@@ -108,24 +116,22 @@ frontend/src/
 │   ├── PaymentGate.jsx
 │   ├── ProductDiscovery.jsx
 │   └── PurchasePlan.jsx
-│
 ├── pages/
 │   ├── CommercePage.jsx
 │   ├── OrdersPage.jsx
 │   └── OrderDetailsPage.jsx
-│
 ├── App.jsx
 ├── App.css
 └── index.css
 ```
 
-The main application areas are:
+The main customer areas are:
 
 ``` text
 Shop
-  ↓
+ ↓
 Orders
-  ↓
+ ↓
 Order Details
 ```
 
@@ -133,14 +139,13 @@ The commerce page contains the active agentic purchasing workflow.
 
 ------------------------------------------------------------------------
 
-# 4. Backend Architecture
+## 5. Backend Architecture
 
 The backend uses FastAPI with separate API, schema, database,
 integration, and service responsibilities.
 
 ``` text
 backend/app/
-│
 ├── api/
 │   ├── agent.py
 │   ├── audit.py
@@ -150,7 +155,6 @@ backend/app/
 │   ├── payment.py
 │   ├── purchase.py
 │   └── tracking.py
-│
 ├── db/
 │   ├── database.py
 │   ├── models.py
@@ -158,12 +162,7 @@ backend/app/
 │   └── data/
 │       ├── products.json
 │       └── images/
-│
 ├── schemas/
-│   ├── notification.py
-│   ├── order.py
-│   └── tracking.py
-│
 └── services/
     ├── agent_service.py
     ├── groq_adapter.py
@@ -172,60 +171,59 @@ backend/app/
     └── tracking_service.py
 ```
 
-The API layer handles HTTP boundaries.
+Responsibilities:
 
-The service layer contains business behavior.
-
-The database layer provides persistence.
-
-The Groq adapter isolates the external AI integration.
+-   **API layer:** HTTP boundaries
+-   **Service layer:** business behavior
+-   **Database layer:** persistence
+-   **Schema layer:** request/response validation
+-   **Groq adapter:** external AI integration boundary
 
 ------------------------------------------------------------------------
 
-# 5. Natural-Language Agent Flow
+## 6. Natural-Language Agent Flow
 
-A request such as:
+For:
 
 ``` text
 Buy wireless ANC headphones under ₹5000
 ```
 
-moves through:
+the flow is:
 
 ``` text
 Customer Request
-       ↓
+      ↓
 Agent API
-       ↓
+      ↓
 Groq Adapter
-       ↓
+      ↓
 Structured AI Intent
-       ↓
+      ↓
 Agent Service
-       ↓
+      ↓
 Catalog Validation
-       ↓
+      ↓
 Policy Validation
-       ↓
+      ↓
 Purchase Plan
 ```
 
 The AI produces structured intent information.
 
-The backend then validates that information instead of blindly trusting
-it.
+The backend validates that information instead of blindly trusting it.
 
 ------------------------------------------------------------------------
 
-# 6. Catalog Boundary
+## 7. Catalog Boundary
 
-The catalog is backed by:
+The controlled catalog is backed by:
 
 ``` text
 backend/app/db/data/products.json
 ```
 
-The demo catalog contains:
+The catalog contains product information such as:
 
 -   Product ID
 -   Product name
@@ -240,7 +238,7 @@ Product images are stored under:
 backend/app/db/data/images/
 ```
 
-The catalog supports:
+Catalog operations include:
 
 ``` text
 Get products
@@ -252,18 +250,21 @@ The catalog is also the source used when looking for valid alternatives.
 
 ------------------------------------------------------------------------
 
-# 7. Catalog Inquiry vs Product Request
+## 8. Catalog Inquiry Boundary
 
-AgentCart distinguishes a missing catalog category from an unavailable
-catalog item.
+![AgentCart Failure
+Handling](assets/failure-handling-catalog-inquiry.png)
 
-For a request such as:
+AgentCart distinguishes a missing catalog category from a product that
+exists but is unavailable.
+
+For:
 
 ``` text
 Is there any TV?
 ```
 
-if the requested category is not represented, the system returns:
+when TV is not represented in the catalog, the backend returns:
 
 ``` text
 CATALOG_INQUIRY
@@ -271,32 +272,28 @@ CATALOG_INQUIRY
 
 with no purchase plan.
 
-The frontend can then explain that the requested category is unavailable
-and keep the customer in the catalog experience.
-
 This prevents an unrelated product from being selected merely because
-the AI needs to return a product.
+the AI is expected to return a product.
 
 ------------------------------------------------------------------------
 
-# 8. Alternative Product Selection
+## 9. Alternative Product Selection
 
-When a genuine requested product exists but is unavailable because its
-stock is zero:
+When a genuine requested product exists but has zero stock:
 
 ``` text
 Requested Product
-       ↓
+      ↓
 Stock Check
-       ↓
+      ↓
 Unavailable
-       ↓
+      ↓
 Find Available Catalog Products
-       ↓
+      ↓
 Rank Alternatives
-       ↓
+      ↓
 Customer Chooses
-       ↓
+      ↓
 Backend Revalidates
 ```
 
@@ -306,55 +303,54 @@ The original budget remains part of the constraints.
 
 ------------------------------------------------------------------------
 
-# 9. Purchase Plan
+## 10. Purchase Plan
 
 The purchase plan is the controlled intermediate state between
 recommendation and payment.
 
 A plan contains information such as:
 
--   Plan ID;
--   maximum budget;
--   currency;
--   status;
--   explanation;
--   product items;
--   quantity;
--   unit price.
+-   Plan ID
+-   Maximum budget
+-   Currency
+-   Status
+-   Explanation
+-   Product items
+-   Quantity
+-   Unit price
 
 The plan allows the customer to inspect the proposed purchase before
-authorizing it.
+authorization.
 
 ------------------------------------------------------------------------
 
-# 10. Deterministic Policy Validation
+## 11. Deterministic Policy Validation
 
 The backend validates:
 
 ``` text
 Product exists?
-       ↓
+      ↓
 Quantity valid?
-       ↓
+      ↓
 Stock sufficient?
-       ↓
+      ↓
 Within budget?
-       ↓
+      ↓
 Plan state valid?
-       ↓
+      ↓
 Continue
 ```
 
 The purpose is to prevent model output from bypassing deterministic
 commerce rules.
 
-The AI may propose.
-
-The backend determines whether the proposal is valid.
+> **The AI may propose. The backend determines whether the proposal is
+> valid.**
 
 ------------------------------------------------------------------------
 
-# 11. Human Approval
+## 12. Human Approval
 
 Approval is an explicit state transition:
 
@@ -368,8 +364,6 @@ PLAN_APPROVED
 
 Payment-order creation is gated behind approval.
 
-This produces a clear boundary:
-
 ``` text
 AI Recommendation
         ≠
@@ -378,11 +372,11 @@ Customer Authorization
 
 ------------------------------------------------------------------------
 
-# 12. Payment Architecture
+## 13. Payment Architecture
 
-The payment API integrates Razorpay Test Mode.
+![AgentCart Money and Safety Boundary](assets/money-safety-boundary.png)
 
-Expected lifecycle:
+AgentCart integrates Razorpay Test Mode.
 
 ``` text
 Approved Plan
@@ -405,40 +399,7 @@ completion signal.
 
 ------------------------------------------------------------------------
 
-# 13. Payment Verification Boundary
-
-The security boundary is:
-
-``` text
-Checkout Response
-       ↓
-Payment Identifiers
-       ↓
-Backend Verification
-       ↓
-Verified
-       ↓
-Purchase Completion
-```
-
-Conceptually:
-
-``` text
-Frontend:
-"Payment succeeded"
-
-must not automatically become:
-
-Backend:
-"Purchase completed"
-```
-
-Only the verified payment state can advance the transaction into
-completion.
-
-------------------------------------------------------------------------
-
-# 14. Database Model
+## 14. Database Model
 
 Major entities:
 
@@ -452,7 +413,7 @@ Fulfillment
 Notification
 ```
 
-Relationship model:
+Relationship concept:
 
 ``` text
 Product
@@ -478,7 +439,7 @@ Important transaction state is persisted in SQLite.
 
 ------------------------------------------------------------------------
 
-# 15. Order Management
+## 15. Order Management
 
 Order APIs:
 
@@ -489,66 +450,53 @@ GET /api/orders/{order_id}
 
 Persisted order information can include:
 
--   Order ID;
--   Plan ID;
--   amount;
--   currency;
--   status;
--   Razorpay order ID;
--   Razorpay payment ID;
--   creation timestamp;
--   items;
--   plan explanation;
--   plan status.
+-   Order ID
+-   Plan ID
+-   Amount
+-   Currency
+-   Status
+-   Razorpay order ID
+-   Razorpay payment ID
+-   Creation timestamp
+-   Items
+-   Plan explanation
+-   Plan status
 
 ------------------------------------------------------------------------
 
-# 16. Fulfillment Tracking
+## 16. Fulfillment Tracking
 
 After successful payment verification, an order can enter the controlled
-demo fulfillment lifecycle:
+demonstration lifecycle:
 
 ``` text
 PROCESSING
-     ↓
+    ↓
 SHIPPED
-     ↓
+    ↓
 OUT_FOR_DELIVERY
-     ↓
+    ↓
 DELIVERED
 ```
 
 The tracking service:
 
-1.  validates order/payment eligibility;
-2.  creates fulfillment state when appropriate;
-3.  advances the fulfillment state;
-4.  records an audit event;
-5.  creates a notification.
+1.  Validates order/payment eligibility
+2.  Creates fulfillment state when appropriate
+3.  Advances the fulfillment state
+4.  Records an audit event
+5.  Creates a notification
 
-The tracking system is a controlled hackathon demonstration, not a live
-courier integration.
+This is a controlled Buildathon demonstration, not a live courier
+integration.
 
 ------------------------------------------------------------------------
 
-# 17. Notification System
+## 17. Notification System
 
 Notifications are persisted in the database.
 
-A notification contains information such as:
-
-``` text
-notification_id
-order_id
-plan_id
-title
-message
-notification_type
-is_read
-created_at
-```
-
-Tracking transitions generate notifications.
+Tracking transitions generate notifications:
 
 ``` text
 PROCESSING
@@ -573,7 +521,7 @@ notification center.
 
 ------------------------------------------------------------------------
 
-# 18. Audit System
+## 18. Audit System
 
 Important transaction events are recorded chronologically.
 
@@ -601,16 +549,16 @@ The audit system provides an inspectable transaction history.
 
 ------------------------------------------------------------------------
 
-# 19. API Boundaries
+## 19. API Boundaries
 
-## Agent API
+### Agent
 
 ``` text
 POST /api/agent/purchase
 POST /api/agent/select-product
 ```
 
-## Catalog API
+### Catalog
 
 ``` text
 GET /api/catalog/products
@@ -618,7 +566,7 @@ GET /api/catalog/products/{product_id}
 GET /api/catalog/search
 ```
 
-## Purchase API
+### Purchase
 
 ``` text
 GET  /api/purchase/plans/{plan_id}
@@ -626,7 +574,7 @@ POST /api/purchase/plans/{plan_id}/approve
 POST /api/purchase/plans/{plan_id}/reject
 ```
 
-## Payment API
+### Payment
 
 ``` text
 POST /api/payment/plans/{plan_id}/orders
@@ -634,30 +582,30 @@ GET  /api/payment/orders/{payment_order_id}
 POST /api/payment/orders/{payment_order_id}/verify
 ```
 
-## Orders API
+### Orders
 
 ``` text
 GET /api/orders/
 GET /api/orders/{order_id}
 ```
 
-## Tracking API
+### Tracking
 
 ``` text
 GET  /api/orders/{order_id}/tracking
 POST /api/orders/{order_id}/tracking/advance
 ```
 
-## Notifications API
+### Notifications
 
 ``` text
-GET  /api/notifications/
-GET  /api/notifications/unread-count
+GET /api/notifications/
+GET /api/notifications/unread-count
 POST /api/notifications/{notification_id}/read
 POST /api/notifications/read-all
 ```
 
-## Audit API
+### Audit
 
 ``` text
 GET /api/audit/
@@ -666,7 +614,7 @@ GET /api/audit/plans/{plan_id}
 
 ------------------------------------------------------------------------
 
-# 20. End-to-End Data Flow
+## 20. End-to-End Data Flow
 
 ``` text
 Customer
@@ -692,13 +640,13 @@ Agent Service
                    Purchase Plan
                          │
                          ▼
-                  Human Approval
+                   Human Approval
                          │
                          ▼
-                    Payment API
+                     Payment API
                          │
                          ▼
-                     Razorpay
+                      Razorpay
                          │
                          ▼
                 Backend Verification
@@ -720,7 +668,7 @@ Agent Service
 
 ------------------------------------------------------------------------
 
-# 21. Docker Architecture
+## 21. Docker Architecture
 
 ``` text
 docker compose
@@ -742,7 +690,7 @@ The SQLite database is persisted through the configured host mapping.
 
 ------------------------------------------------------------------------
 
-# 22. Architectural Invariants
+## 22. Architectural Invariants
 
 ### Invariant 1
 
@@ -783,7 +731,7 @@ Fulfillment notifications originate from backend state transitions.
 
 ------------------------------------------------------------------------
 
-# 23. Design Philosophy
+## 23. Design Philosophy
 
 AgentCart is intentionally designed around **bounded agency**.
 
@@ -802,5 +750,5 @@ behind deterministic controls
 and human authorization.
 ```
 
-This allows the system to demonstrate agentic commerce without treating
+This allows AgentCart to demonstrate agentic commerce without treating
 the AI model itself as a trusted financial authority.
