@@ -650,8 +650,6 @@ have controlled recovery paths.
 
 ## 18. Documentation
 
-## 18. Documentation
-
 - [`docs/architecture.md`](docs/architecture.md) — Technical architecture, components, data flow, APIs, deployment, and invariants.
 - [`docs/demo-flow.md`](docs/demo-flow.md) — Five-minute Buildathon presentation and demonstration checklist.
 - [`docs/failure-handling.md`](docs/failure-handling.md) — Failure scenarios, expected behavior, and recovery paths.
